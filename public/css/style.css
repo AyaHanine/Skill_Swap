@@ -1,0 +1,30 @@
+body {
+  font-family: Arial, sans-serif;
+}
+
+h1 {
+  font-size: 24px;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.offer-card {
+  border: 1px solid #ddd;
+  border-radius: 5px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background-color: #f9f9f9;
+}
+
+.offer-card h2 {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.offer-card p {
+  font-size: 14px;
+  color: #555;
+}

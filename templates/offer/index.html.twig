@@ -1,0 +1,58 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Offres{% endblock %}
+
+{% block body %}
+    <div class="container mt-8 px-4 text-black">
+        <!-- Barre de recherche -->
+        <div class="mb-6 flex justify-center">
+            <form method="GET" action="{{ path('offer_search') }}" class="w-full md:w-1/3">
+                <div class="relative">
+                    <input type="text" name="q" placeholder="Rechercher des offres..." class="w-full py-3 pl-10 pr-4 border-2 border-gray-300 rounded-lg shadow-md focus:outline-none focus:border-blue-600" value="{{ app.request.query.get('q') }}">
+                </div>
+            </form>
+        </div>
+
+        <h2 class="text-3xl font-semibold mb-6">Les Offres</h2>
+          <!-- Bouton "Ajouter une offre" visible seulement si l'utilisateur est connecté -->
+            {% if app.user %}
+                <a href="{{ path('offer_new') }}" class="bg-green-600 text-white py-3 px-6 rounded-lg shadow-md hover:bg-green-700 transition duration-300">
+                    ➕ Ajouter une offre
+                </a>
+            {% endif %}
+
+        {% if app.request.get('q') %}
+            <p class="text-center text-gray-500">Résultats pour : <strong>{{ app.request.get('q') }}</strong></p>
+            <div class="text-center my-4">
+                <a href="{{ path('offer_index') }}" class="text-blue-600 hover:underline">Réinitialiser la recherche</a>
+            </div>
+        {% endif %}
+
+        {% if pagination.items is empty %}
+            <p class="text-center text-gray-500">Aucune offre ne correspond à votre recherche.</p>
+        {% else %}
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for offer in pagination %}
+                    <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition-shadow duration-300 ease-in-out transform hover:scale-105">
+                        <h5 class="text-xl font-semibold mb-3">
+                            <a href="{{ path('offer_show', { id: offer.id }) }}" class="text-blue-600 hover:text-blue-800 transition duration-200">{{ offer.title }}</a>
+                        </h5>
+                        <p class="text-gray-600 mb-4">
+                            {{ offer.description|slice(0, 100) }}...
+                        </p>
+                        <div class="flex justify-between items-center mt-4">
+                            <a href="{{ path('offer_show', { id: offer.id }) }}" class="bg-blue-600 text-white py-2 px-6 rounded-lg text-sm font-medium transition duration-300 hover:bg-blue-700">
+                                Voir l'offre
+                            </a>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-6 flex justify-center">
+                {{ knp_pagination_render(pagination) }}
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

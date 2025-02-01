@@ -1,0 +1,103 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Dashboard - SkillSwap{% endblock %}
+
+{% block body %}
+<div class="container mt-6 flex text-black">
+    <!-- Fiche Personnelle - Partie gauche -->
+    <div class="w-full md:w-1/3 bg-white shadow-lg rounded-lg p-6 h-screen">
+        <h3 class="text-xl font-semibold mb-4 text-black">Ma Fiche Personnelle</h3>
+        <ul class="space-y-4 text-black">
+            <li><strong>Prénom :</strong> </li>
+            <li><strong>Nom :</strong> </li>
+            <li><strong>Email :</strong> </li>
+            <li><strong>Compétences :</strong>  
+            </li>
+        </ul>
+        <a href="{{ path('user_edit') }}" class="mt-4 inline-block bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700">Modifier mes informations</a>
+    </div>
+
+    <!-- Partie droite - Offres récentes, Demandes en attente, etc. -->
+    <div class="w-full md:w-2/3 ml-6 space-y-6">
+        <!-- Dernières Offres -->
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h3 class="text-xl font-semibold mb-3">Dernières Offres</h3>
+            {% if latest_offers is empty %}
+                <p>Aucune offre disponible pour le moment.</p>
+            {% else %}
+                <ul>
+                    {% for offer in latest_offers %}
+                        <li class="mb-2">
+                            <a href="{{ path('offer_show', { id: offer.id }) }}" class="text-blue-600 hover:underline">
+                                <strong>{{ offer.title }}</strong> - Posté par 
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <h2 class="text-2xl font-semibold mb-4">📩 Demandes reçues</h2>
+{% if requests is empty %}
+    <p>Aucune demande reçue.</p>
+{% else %}
+    <ul class="list-disc pl-6">
+        {% for request in requests %}
+            <li class="bg-gray-100 p-4 rounded-lg mb-2">
+                <strong>{{ request.user.firstName }} {{ request.user.lastName }}</strong> souhaite obtenir 
+                <strong>{{ request.offer.title }}</strong>.
+
+                <form method="POST" action="{{ path('request_accept', { id: request.id }) }}" class="inline">
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                        ✅ Accepter
+                    </button>
+                </form>
+
+                <form method="POST" action="{{ path('request_decline', { id: request.id }) }}" class="inline">
+                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
+                        ❌ Refuser
+                    </button>
+                </form>
+            </li>
+        {% endfor %}
+    </ul>
+{% endif %}
+
+
+        <!-- Demandes en Attente -->
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h3 class="text-xl font-semibold mb-3">Demandes en attente</h3>
+            {% if pending_requests is empty %}
+                <p>Aucune demande en attente.</p>
+            {% else %}
+                <ul>
+                    {% for request in pending_requests %}
+                        <li class="mb-2">
+                            <strong>{{ request.offer.title }}</strong> - 
+                            {% if request.status == 'pending' %}
+                                <span class="badge bg-yellow-300">En attente</span>
+                            {% endif %}
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <!-- Avis et Notes -->
+        <div class="bg-white shadow-lg rounded-lg p-6">
+            <h3 class="text-xl font-semibold mb-3">Mes Avis et Notes</h3>
+            {% if user_reviews is empty %}
+                <p>Vous n'avez pas encore d'avis.</p>
+            {% else %}
+                <ul>
+                    {% for review in user_reviews %}
+                        <li class="mb-2">
+                            <strong>Note :</strong> {{ review.rating }}/5 - "{{ review.comment }}"
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

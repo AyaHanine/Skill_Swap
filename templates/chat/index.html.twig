@@ -1,0 +1,46 @@
+{# templates/chat/index.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block body %}
+    <h1>Chat en Temps Réel</h1>
+    <div id="chat">
+        <div id="messages">
+            <!-- Les messages apparaîtront ici -->
+        </div>
+        <input type="text" id="messageInput" placeholder="Entrez votre message...">
+        <button onclick="sendMessage()">Envoyer</button>
+    </div>
+
+    <script>
+        // Abonnement au topic Mercure "chat"
+        const eventSource = new EventSource('{{ mercure_url }}?topic=chat'); // Abonnez-vous au topic 'chat'
+
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data); // Récupérer les données du message
+            const messagesDiv = document.getElementById('messages');
+            const newMessage = document.createElement('div');
+            newMessage.textContent = data.content;
+            messagesDiv.appendChild(newMessage);
+        };
+
+        // Fonction pour envoyer un message via Mercure
+        function sendMessage() {
+            const message = document.getElementById('messageInput').value;
+
+            // Envoi du message au serveur Symfony (qui le publie sur Mercure)
+            fetch('/chat/send', {
+                method: 'POST',
+                body: JSON.stringify({ content: message }),
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log('Message envoyé:', data);
+                document.getElementById('messageInput').value = ''; // Efface le champ de saisie
+            })
+            .catch(error => console.error('Erreur:', error));
+        }
+    </script>
+{% endblock %}

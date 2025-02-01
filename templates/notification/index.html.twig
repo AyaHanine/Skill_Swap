@@ -1,0 +1,31 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Notifications{% endblock %}
+
+{% block body %}
+    <div class="container mt-8 px-4 text-black">
+        <h2 class="text-3xl font-semibold mb-4">📢 Mes Notifications</h2>
+
+        {% if notifications is empty %}
+            <p class="text-center text-gray-500">Aucune nouvelle notification.</p>
+        {% else %}
+            <ul class="list-disc pl-6">
+                {% for notification in notifications %}
+                    <li class="mb-2 bg-gray-100 p-3 rounded-lg shadow">
+                        <p class="text-gray-700">{{ notification.message }}</p>
+                        <small class="text-gray-500">{{ notification.createdAt|date('d/m/Y H:i') }}</small>
+                    </li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+    </div>
+
+    {% if notifications is not empty %}
+    <div class="text-center mt-4">
+        <a href="{{ path('notifications_mark_all_read') }}" class="bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+            ✅ Marquer tout comme lu
+        </a>
+    </div>
+{% endif %}
+
+{% endblock %}

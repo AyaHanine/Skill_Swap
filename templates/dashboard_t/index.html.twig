@@ -1,0 +1,85 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Accueil - SkillSwap{% endblock %}
+
+{% block body %}
+    <div class="container mt-4">
+        <h2>Bienvenue, {{ app.user.firstName }} !</h2>
+        <p>Échangez vos compétences et découvrez de nouvelles offres.</p>
+
+        <div class="row mt-4">
+            <!-- Section Offres récentes -->
+            <div class="col-md-6">
+                <h3>Dernières Offres</h3>
+                {% if latest_offers is empty %}
+                    <p>Aucune offre disponible pour le moment.</p>
+                {% else %}
+                    <ul>
+                        {% for offer in latest_offers %}
+                            <li>
+                                <a href="{{ path('offer_show', { id: offer.id }) }}">
+                                    {{ offer.title }} - Posté par {{ offer.user.firstName }}
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <!-- Section Demandes en attente -->
+            <div class="col-md-6">
+                <h3>Demandes en attente</h3>
+                {% if pending_requests is empty %}
+                    <p>Aucune demande en attente.</p>
+                {% else %}
+                    <ul>
+                        {% for request in pending_requests %}
+                            <li>
+                                <strong>{{ request.offer.title }}</strong> - Demande de {{ request.user.firstName }}
+                                {% if request.status == 'pending' %}
+                                    <span class="badge bg-warning">En attente</span>
+                                {% endif %}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="row mt-4">
+            <!-- Section Messages non lus -->
+            <div class="col-md-6">
+                <h3>Messages non lus</h3>
+                {% if unread_messages is empty %}
+                    <p>Aucun message non lu.</p>
+                {% else %}
+                    <ul>
+                        {% for message in unread_messages %}
+                            <li>
+                                <a href="{{ path('message_show', { id: message.conversation.id }) }}">
+                                    De {{ message.sender.firstName }} : "{{ message.content|slice(0, 30) }}..."
+                                </a>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+
+            <!-- Section Avis et Notes -->
+            <div class="col-md-6">
+                <h3>Mes Avis et Notes</h3>
+                {% if user_reviews is empty %}
+                    <p>Vous n'avez pas encore d'avis.</p>
+                {% else %}
+                    <ul>
+                        {% for review in user_reviews %}
+                            <li>
+                                <strong>Note :</strong> {{ review.rating }}/5 - "{{ review.comment }}"
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

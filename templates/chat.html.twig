@@ -1,0 +1,56 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Chat{% endblock %}
+
+{% block body %}
+<div class="container mt-8">
+    <h2 class="text-3xl font-semibold mb-6">💬 Messagerie</h2>
+
+    <!-- Liste des utilisateurs -->
+    <h3 class="text-xl font-semibold mb-4">Utilisateurs</h3>
+    <ul>
+        {% for user in users %}
+            <li>
+                <button onclick="startChat({{ user.id }}, '{{ user.firstName }}')">
+                    💬 Chat avec {{ user.firstName }}
+                </button>
+            </li>
+        {% endfor %}
+    </ul>
+
+    <!-- Zone de Chat -->
+    <div id="chatBox" style="display: none;">
+        <h3 id="chatWith" class="text-xl font-semibold mt-6"></h3>
+        <textarea id="chatInput" class="w-full p-3 border rounded mt-2"></textarea>
+        <button onclick="sendMessageToUser()">📩 Envoyer</button>
+    </div>
+</div>
+
+<script src="{{ asset('js/firebase-config.js') }}"></script>
+<script>
+    let currentReceiverId = null;
+
+    function startChat(userId, userName) {
+        currentReceiverId = userId;
+        document.getElementById("chatWith").innerText = "Chat avec " + userName;
+        document.getElementById("chatBox").style.display = "block";
+    }
+
+    function sendMessageToUser() {
+        const content = document.getElementById("chatInput").value;
+        fetch("/messages/send", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                receiverId: currentReceiverId,
+                content: content
+            })
+        }).then(response => response.json()).then(data => {
+            alert(data.message);
+            document.getElementById("chatInput").value = "";
+        });
+    }
+</script>
+{% endblock %}
