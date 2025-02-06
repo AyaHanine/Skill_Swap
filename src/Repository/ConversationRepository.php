@@ -40,4 +40,13 @@ class ConversationRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    public function findByUser(int $userId): array
+    {
+        return $this->createQueryBuilder('c')
+            ->where('c.userOne = :userId OR c.userTwo = :userId')
+            ->setParameter('userId', $userId)
+            ->getQuery()
+            ->getResult();
+    }
 }

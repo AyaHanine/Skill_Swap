@@ -1,39 +1,105 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}Request index{% endblock %}
+{% block title %}Mes Requêtes{% endblock %}
 
 {% block body %}
-    <h1>Request index</h1>
+    <div class="container mt-8 px-4 text-black">
+        <h2 class="text-3xl font-semibold mb-6">📩 Mes Requêtes</h2>
 
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Id</th>
-                <th>Status</th>
-                <th>Message</th>
-                <th>CreatedAt</th>
-                <th>actions</th>
-            </tr>
-        </thead>
-        <tbody>
-        {% for request in requests %}
-            <tr>
-                <td>{{ request.id }}</td>
-                <td>{{ request.status }}</td>
-                <td>{{ request.message }}</td>
-                <td>{{ request.createdAt ? request.createdAt|date('Y-m-d H:i:s') : '' }}</td>
-                <td>
-                    <a href="{{ path('app_request_show', {'id': request.id}) }}">show</a>
-                    <a href="{{ path('app_request_edit', {'id': request.id}) }}">edit</a>
-                </td>
-            </tr>
-        {% else %}
-            <tr>
-                <td colspan="5">no records found</td>
-            </tr>
-        {% endfor %}
-        </tbody>
-    </table>
+        <!-- Onglets pour naviguer entre les requêtes envoyées et reçues -->
+        <div class="flex justify-center mb-4">
+            <button onclick="showTab('sent')" class="tab-btn bg-blue-500 text-white px-4 py-2 rounded-l-lg">Requêtes envoyées</button>
+            <button onclick="showTab('received')" class="tab-btn bg-gray-300 text-gray-700 px-4 py-2 rounded-r-lg">Requêtes reçues</button>
+        </div>
 
-    <a href="{{ path('app_request_new') }}">Create new</a>
+        <!-- Requêtes envoyées -->
+        <div id="sent-requests" class="tab-content">
+            <h3 class="text-2xl font-semibold mb-4">📤 Requêtes envoyées</h3>
+            {% if sentRequests is empty %}
+                <p class="text-gray-500">Aucune requête envoyée.</p>
+            {% else %}
+                <ul class="list-disc pl-6">
+                    {% for request in sentRequests %}
+                        <li class="bg-gray-100 p-4 rounded-lg mb-2">
+                            <span class="text-gray-700">📌 Offre :</span>
+                            <a href="{{ path('offer_show', { id: request.offer.id }) }}" class="text-blue-500 hover:underline">
+                                {{ request.offer.title }}
+                            </a>
+                            <br>
+                            <span class="text-gray-700">📅 Envoyé le :</span> {{ request.createdAt|date('d/m/Y') }}
+                            <br>
+                            <span class="text-gray-700">🔄 Statut :</span> <strong>{{ request.status.value }}</strong>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+
+        <!-- Requêtes reçues -->
+        <div id="received-requests" class="tab-content hidden">
+            <h3 class="text-2xl font-semibold mb-4">📥 Requêtes reçues</h3>
+            {% if receivedRequests is empty %}
+                <p class="text-gray-500">Aucune requête reçue.</p>
+            {% else %}
+                <ul class="list-disc pl-6">
+                    {% for request in receivedRequests %}
+                        <li class="bg-gray-100 p-4 rounded-lg mb-2">
+                            <span class="text-gray-700">👤 Demandeur :</span>
+                            <a href={{path('user_profile', {id: request.user.id}) }} class="text-blue-500 hover:underline">
+                                {{ request.user.firstName }} {{ request.user.lastName }}
+                            </a>
+                            <br>
+                            <span class="text-gray-700">📌 Offre concernée :</span> {{ request.offer.title }}
+                            <br>
+                            <span class="text-gray-700">📅 Reçu le :</span> {{ request.createdAt|date('d/m/Y') }}
+                            <br>
+                            <span class="text-gray-700">🔄 Statut :</span> <strong>{{ request.status.value }}</strong>
+                            <form method="POST" action="{{ path('request_accept', { id: request.id }) }}" class="inline">
+                    <button type="submit" class="bg-green-600 text-white px-4 py-2 rounded-md hover:bg-green-700">
+                        ✅ Accepter
+                    </button>
+                </form>
+
+                <form method="POST" action="{{ path('request_decline', { id: request.id }) }}" class="inline">
+                    <button type="submit" class="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700">
+                        ❌ Refuser
+                    </button>
+                </form>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Script pour gérer l'affichage des onglets -->
+    <script>
+        function showTab(tab) {
+            document.getElementById('sent-requests').classList.add('hidden');
+            document.getElementById('received-requests').classList.add('hidden');
+
+            if (tab === 'sent') {
+                document.getElementById('sent-requests').classList.remove('hidden');
+            } else {
+                document.getElementById('received-requests').classList.remove('hidden');
+            }
+        }
+    </script>
+
+    <!-- Styles pour les onglets -->
+    <style>
+        .tab-btn {
+            cursor: pointer;
+            font-weight: bold;
+            padding: 10px 20px;
+            transition: background 0.3s;
+        }
+        .tab-btn:hover {
+            background: #4a90e2;
+            color: white;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
 {% endblock %}

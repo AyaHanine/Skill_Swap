@@ -1,0 +1,46 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Modifier un utilisateur{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-4 text-primary">Modifier un utilisateur</h1>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                {{ form_start(form) }}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.firstName.vars.id }}" class="form-label">Prénom</label>
+                        {{ form_widget(form.firstName, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.lastName.vars.id }}" class="form-label">Nom</label>
+                        {{ form_widget(form.lastName, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.email.vars.id }}" class="form-label">Email</label>
+                        {{ form_widget(form.email, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="{{ form.bio.vars.id }}" class="form-label">Biographie</label>
+                        {{ form_widget(form.bio, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+
+                
+                    <div class="mb-3">
+                        <label for="{{ form.roles.vars.id }}" class="form-label">Rôle</label>
+                        {{ form_widget(form.roles, {'attr': {'class': 'form-control'}}) }}
+                    </div>
+
+                    <div class="mb-3 text-center">
+                        {{ form_widget(form.submit, {'attr': {'class': 'btn btn-primary btn-lg'}}) }}
+                    </div>
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -18,11 +18,7 @@ class Category
     #[ORM\Column(length: 255)]
     private ?string $name = null;
 
-    /**
-     * @var Collection<int, Skill>
-     */
-    #[ORM\OneToMany(targetEntity: Skill::class, mappedBy: 'category')]
-    private Collection $skills;
+
 
     public function __construct()
     {

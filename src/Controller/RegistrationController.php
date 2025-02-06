@@ -2,7 +2,9 @@
 
 namespace App\Controller;
 
+use App\Entity\Skill;
 use App\Entity\User;
+use App\Enum\SkillStatus;
 use App\Form\RegistrationFormType;
 use App\Security\EmailVerifier;
 use App\Security\LoginFormAuthenticator;
@@ -14,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
+use Symfony\Component\Mime\Email;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Contracts\Translation\TranslatorInterface;
@@ -37,13 +40,28 @@ class RegistrationController extends AbstractController
         UserPasswordHasherInterface $userPasswordHasher,
         Security $security,
         EntityManagerInterface $entityManager,
-        MailerInterface $mailer
+        MailerInterface $mailer,
     ): Response {
         $user = new User();
-        $form = $this->createForm(RegistrationFormType::class, $user);
+        $competences = $entityManager->getRepository(Skill::class)->findAll();
+
+        // Filtrer les compétences pour ne garder que celles qui ne sont pas en statut "en attente"
+        $competencesFiltrées = array_filter($competences, function ($skill) {
+            return $skill->getStatus() !== SkillStatus::enAttente; // Ne garder que les compétences non "en attente"
+        });
+        $form = $this->createForm(RegistrationFormType::class, $user, ['skills' => $competencesFiltrées]);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
+            // Si l'utilisateur a ajouté une compétence "autre"
+
+            $entityManager->flush();
+
+            // Notifier l'utilisateur de la soumission
+            $this->addFlash('success', 'Votre compétence a été soumise pour validation.');
+
+
+
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
 
@@ -139,7 +157,7 @@ class RegistrationController extends AbstractController
         );
 
         // Renvoyer l'email
-        $email = (new TemplatedEmail())
+        $email = (new Email())
             ->from(new Address('noreply@skillswap.com', 'SkillSwap'))
             ->to(new Address($user->getEmail()))
             ->subject('Vérifiez votre adresse email')

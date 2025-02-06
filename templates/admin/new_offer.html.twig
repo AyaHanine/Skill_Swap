@@ -1,0 +1,21 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Ajouter une offre{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-4 text-primary">Ajouter une offre</h1>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                {{ form_start(form) }}
+                      {{ form_row(form.title) }}
+                    {{ form_row(form.description) }}
+                    {{ form_row(form.skillOffered) }}
+                                        {{ form_row(form.skillWanted) }}
+                                                                                {{ form_row(form.isNegotiable) }}
+                {{ form_end(form) }}
+            </div>
+        </div>
+    </div>
+{% endblock %}

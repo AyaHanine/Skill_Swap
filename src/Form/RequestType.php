@@ -15,7 +15,10 @@ class RequestType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder
-            ->add('status')
+            ->add('status', RequestType::class, [
+                'label' => 'Statut de la demande',
+                'choice_label' => 'name',
+            ])
             ->add('message')
             ->add('createdAt', null, [
                 'widget' => 'single_text',

@@ -40,4 +40,22 @@ class SkillRepository extends ServiceEntityRepository
     //            ->getOneOrNullResult()
     //        ;
     //    }
+
+    public function findByFilters(?array $filters): array
+    {
+        $qb = $this->createQueryBuilder('s');
+
+        if (!empty($filters['name'])) {
+            $qb->andWhere('s.name LIKE :name')
+                ->setParameter('name', '%' . $filters['name'] . '%');
+        }
+
+        if (!empty($filters['status'])) {
+            $qb->andWhere('s.status = :status')
+                ->setParameter('status', $filters['status']);
+        }
+
+        return $qb->getQuery()->getResult();
+    }
 }
+

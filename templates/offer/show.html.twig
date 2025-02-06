@@ -8,22 +8,36 @@
 
         <p class="text-lg text-gray-700"><strong>Description :</strong> {{ offer.description }}</p>
         <p class="text-lg text-gray-700"><strong>Posté par :</strong> {{ offer.user.firstName }} {{ offer.user.lastName }}</p>
+        
+        <!-- Statut de l'offre -->
         <p><strong>Statut :</strong> 
-    {% if offer.status == 'reserved' %}
-        <span class="text-yellow-600 font-bold">Réservée</span>
-    {% else %}
-        <span class="text-green-600 font-bold">Disponible</span>
-    {% endif %}
-</p>
+            {% if offer.status.value == 'reservé' %}
+                <span class="text-yellow-600 font-bold">Réservée</span>
+            {% else %}
+                <span class="text-green-600 font-bold">Disponible</span>
+            {% endif %}
+        </p>
 
+        <!-- Compétences liées à l'offre -->
+        <p><strong>Skill Offert :</strong> {{ offer.skillOffered.name }}</p>
+        <p><strong>Skill Recherché :</strong> {{ offer.skillWanted.name }}</p>
+        <p><strong>Négociable :</strong> 
+            {% if offer.isNegotiable %}
+                ✅ Oui, le skill recherché est négociable.
+            {% else %}
+                ❌ Non, le skill recherché est obligatoire.
+            {% endif %}
+        </p>
 
-         <!-- Boutons Modifier et Supprimer uniquement si l'utilisateur est propriétaire -->
+        <!-- Boutons Modifier et Supprimer uniquement si l'utilisateur est propriétaire -->
         {% if app.user and app.user.id == offer.user.id %}
             <div class="mt-4 flex space-x-4">
                 <a href="{{ path('offer_edit', { id: offer.id }) }}" class="bg-yellow-500 text-white py-2 px-4 rounded-lg hover:bg-yellow-600 transition duration-300">
                     ✏️ Modifier
                 </a>
                 <form method="POST" action="{{ path('offer_delete', { id: offer.id }) }}" onsubmit="return confirm('Êtes-vous sûr de vouloir supprimer cette offre ?');">
+                    <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ offer.id) }}">
+                    
                     <button type="submit" class="bg-red-600 text-white py-2 px-4 rounded-lg hover:bg-red-700 transition duration-300">
                         🗑️ Supprimer
                     </button>
@@ -31,33 +45,83 @@
             </div>
         {% endif %}
 
-{% if app.user and offer.user and app.user.id != offer.user.id and offer.status != 'reserved' %}
-    <!-- Bouton pour ouvrir le popup -->
-    <button class="bg-blue-600 text-white py-2 px-6 rounded-full mt-4 hover:bg-blue-700 transition duration-300" onclick="openRequestPopup()">
-        Envoyer une demande
-    </button>
-{% else %}
-    <p class="text-red-600 font-bold mt-4">Cette offre est réservée. Vous ne pouvez plus envoyer de demande.</p>
+        {% if app.user and app.user.id != offer.user.id %}
+    <a href="{{ path('report_offer', { id: offer.id }) }}" class="text-red-500 hover:underline">
+
+        🚨 Signaler cette offre
+    </a>
 {% endif %}
 
-        
-            <!-- Popup pour ajouter un message -->
-            <div id="requestPopup" class="popup-overlay hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
-                <div class="popup-content bg-white p-6 rounded-lg shadow-lg w-96">
-                    <h3 class="text-xl font-semibold mb-4 text-gray-800">Envoyer une demande pour "{{ offer.title }}"</h3>
-                    <textarea id="requestMessage" class="w-full p-3 border-2 border-gray-300 rounded-lg mb-4" placeholder="Ajouter un message (optionnel)"></textarea>
-                    <div class="flex justify-end space-x-4">
-                        <button class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300" onclick="sendRequest({{ offer.id }})">Envoyer</button>
-                        <button class="bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300" onclick="closeRequestPopup()">Annuler</button>
-                    </div>
+
+        {% if app.user and offer.user != app.user %}
+            {% set hasRequiredSkill = false %}
+            {% for skill in app.user.skills %}
+                {% if skill.id == offer.skillOffered.id %}
+                    {% set hasRequiredSkill = true %}
+                {% endif %}
+            {% endfor %}
+
+            <!-- Conditions pour l'affichage du bouton d'envoi de demande -->
+            {% if offer.status.value != 'reservé' and (offer.isNegotiable or hasRequiredSkill) %}
+                <button class="bg-blue-600 text-white py-2 px-6 rounded-full mt-4 hover:bg-blue-700 transition duration-300" onclick="openRequestPopup()">
+                    Envoyer une demande
+                </button>
+            {% elseif not offer.isNegotiable and not hasRequiredSkill %}
+                <p class="text-red-500">❌ Vous ne pouvez pas envoyer de demande car vous n'avez pas la compétence requise.</p>
+            {% else %}
+                <p class="text-red-600 font-bold mt-4">Cette offre est réservée. Vous ne pouvez plus envoyer de demande.</p>
+            {% endif %}
+        {% endif %}
+
+        <!-- Popup pour envoyer une demande -->
+        <div id="requestPopup" class="popup-overlay hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
+            <div class="popup-content bg-white p-6 rounded-lg shadow-lg w-96">
+                <h3 class="text-xl font-semibold mb-4 text-gray-800">Envoyer une demande pour "{{ offer.title }}"</h3>
+                <textarea id="requestMessage" class="w-full p-3 border-2 border-gray-300 rounded-lg mb-4" placeholder="Ajouter un message (optionnel)"></textarea>
+                <div class="flex justify-end space-x-4">
+                    <button class="bg-green-600 text-white py-2 px-4 rounded-lg hover:bg-green-700 transition duration-300" onclick="sendRequest({{ offer.id }})">
+                        Envoyer
+                    </button>
+                    <button class="bg-gray-600 text-white py-2 px-4 rounded-lg hover:bg-gray-700 transition duration-300" onclick="closeRequestPopup()">
+                        Annuler
+                    </button>
                 </div>
             </div>
-    </div>
+        </div>
 
-    <!-- Styles CSS -->
-    <style>
-        /* Aucune modification, déjà géré par Tailwind CSS */
-    </style>
+        <!-- Section des avis -->
+        <div class="mt-4">
+            <h4 class="text-lg font-semibold">Avis des utilisateurs</h4>
+            {% for review in offer.reviews %}
+                <div class="border p-3 my-2 rounded-lg">
+                    <strong>{{ review.author.firstName }} {{ review.author.lastName }}</strong> - {{ review.createdAt|date('d/m/Y') }}
+                    <p class="text-yellow-500">⭐ {{ review.rating }}/5</p>
+                    <p>{{ review.comment }}</p>
+                </div>
+            {% else %}
+                <p class="text-gray-500">Aucun avis pour cette offre.</p>
+            {% endfor %}
+        </div>
+
+        <!-- Formulaire pour ajouter un avis -->
+        {% if app.user and offer.user != app.user and form is defined %}
+            <form method="POST" action="{{ path('review_add', { id: offer.id }) }}" class="mt-4">
+                {{ form_start(form) }}
+
+                <label for="rating">Note (1 à 5 étoiles) :</label>
+                {{ form_widget(form.rating) }}
+
+                <label for="comment">Commentaire :</label>
+                {{ form_widget(form.comment) }}
+
+                <button type="submit" class="mt-2 bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700">
+                    Soumettre l'avis
+                </button>
+
+                {{ form_end(form) }}
+            </form>
+        {% endif %}
+    </div>
 
     <!-- Scripts JS -->
     <script>
@@ -71,10 +135,6 @@
 
         function sendRequest(offerId) {
             let message = document.getElementById("requestMessage").value;
-
-            console.log("Envoi de la demande pour l'offre ID:", offerId);
-            console.log("Message :", message);
-
             fetch(`/request/send/${offerId}`, {
                 method: "POST",
                 headers: {
@@ -83,16 +143,10 @@
                 },
                 body: JSON.stringify({ message: message })
             })
-            .then(response => response.text())
+            .then(response => response.json())
             .then(data => {
-                console.log("Réponse complète du serveur :", data);
-                try {
-                    let jsonData = JSON.parse(data);
-                    alert(jsonData.message);
-                } catch (error) {
-                    console.error("Erreur JSON :", error);
-                    alert("Le serveur a renvoyé une réponse invalide.");
-                }
+                alert(data.message);
+                closeRequestPopup();
             })
             .catch(error => {
                 console.error("Erreur AJAX :", error);
@@ -100,36 +154,4 @@
             });
         }
     </script>
-
-   <!-- Section des avis -->
-                        <div class="mt-4">
-                            <h4 class="text-lg font-semibold">Avis des utilisateurs</h4>
-                            {% for review in offer.reviews %}
-                                <div class="border p-3 my-2 rounded-lg">
-                                    <strong>{{ review.author.firstName }} {{ review.author.firstName }}</strong> - {{ review.createdAt|date('d/m/Y') }}
-                                    <p class="text-yellow-500">⭐ {{ review.rating }}/5</p>
-                                    <p>{{ review.comment }}</p>
-                                </div>
-                            {% else %}
-                                <p class="text-gray-500">Aucun avis pour cette offre.</p>
-                            {% endfor %}
-                        </div>
-
-                        <!-- Formulaire pour ajouter un avis -->
-                      {% if app.user and offer.user != app.user and form is defined %}
-    <form method="POST" action="{{ path('review_add', { id: offer.id }) }}">
-        {{ form_start(form) }}
-
-        <label for="rating">Note (1 à 5 étoiles) :</label>
-        {{ form_widget(form.rating) }}
-
-        <label for="comment">Commentaire :</label>
-        {{ form_widget(form.comment) }}
-
-        <button type="submit">Soumettre l'avis</button>
-
-        {{ form_end(form) }}
-    </form>
-{% endif %}
-
 {% endblock %}

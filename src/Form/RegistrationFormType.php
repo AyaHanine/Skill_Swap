@@ -2,7 +2,10 @@
 
 namespace App\Form;
 
+use App\Entity\Skill;
 use App\Entity\User;
+use Doctrine\DBAL\Types\TextType;
+use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
@@ -16,8 +19,11 @@ class RegistrationFormType extends AbstractType
 {
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
+
+        // Vérifier que 'competences' existe dans les options
+        $skillsValidées = $options['skills'];
         $builder
-            ->add('email')
+            ->add(child: 'email')
             ->add('agreeTerms', CheckboxType::class, [
                 'mapped' => false,
                 'constraints' => [
@@ -43,13 +49,36 @@ class RegistrationFormType extends AbstractType
                     ]),
                 ],
             ])
+            ->add('firstName')
+            ->add('lastName')
+            ->add('bio')
+            ->add('skills', EntityType::class, [
+                'class' => Skill::class,
+                'choices' => $this->getSkillsChoices($skillsValidées), // Passer les compétences validées
+                'choice_label' => 'name',
+                'multiple' => true,  // Permet de faire un choix multiple
+                'expanded' => true,  // Affiche les options sous forme de cases à cocher
+            ])
+
+
         ;
+
     }
+    private function getSkillsChoices($skillsValidées)
+    {
+        $choices = [];
+        foreach ($skillsValidées as $skill) {
+            $choices[$skill->getName()] = $skill; // Utiliser l'objet Skill entier
+        }
+        return $choices;
+    }
+
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'data_class' => User::class,
+            'skills' => [],
         ]);
     }
 }

@@ -1,93 +1,64 @@
 {% extends 'base.html.twig' %}
+
 {% block body %}
-    <section class="bg-gray-500 flex items-center justify-center h-screen bg-cover bg-center">
-        <div class="text-center">
-        <h1 class="text-4xl md:text-6xl font-bold mb-4">
-            <br class="text-green"> Exchange </br> your skills with skill swap
-        </h1>
-        <p class="text-lg mb-6">
-            More than 3,000 users
-        </p>
-            <form class="flex justify-center">
-                <input type="text" class="px-4 py-2 rounded-l-full text-gray-800" placeholder="What do you want to learn today?">
-                <button class="px-6 py-2 bg-purple-600 text-white rounded-r-full">Search</button>
-            </form>
+    <!-- Hero Section -->
+    <section class="relative flex items-center justify-center h-screen bg-[#f5f1e7] text-black text-center">
+        <div class="px-6 max-w-3xl">
+            <h1 class="text-4xl md:text-6xl font-extrabold leading-tight">
+                Unlock & Exchange Skills with <span class="text-[#756B5E]">SkillSwap</span>
+            </h1>
+            <p class="text-lg mt-4 text-[#756B5E]">Join <span class="font-bold text-black">3,000+</span> learners and mentors worldwide.</p>
+
+            <!-- Search Bar -->
+            <div class="mt-6 flex justify-center">
+                <input type="text" class="px-4 py-3 rounded-l-full text-gray-800 w-64 md:w-96 focus:ring-2 focus:ring-[#A89C8D]" placeholder="What do you want to learn?">
+                <button class="px-6 py-3 bg-[#A89C8D] hover:bg-[#8c8071] text-white font-semibold rounded-r-full transition">Search</button>
+            </div>
         </div>
     </section>
 
-    <section class="flex items-center justify-center h-[80vh] bg-cover bg-center bg-white text-black">
-    <div class="text-center">
-        <h1 class="text-4xl md:text-6xl font-bold mb-4">
-            Learn something new for free!
-        </h1>
-        <p class="text-lg mb-6">
-            Get a new friend that will manage to help you achieve your goal!
-        </p>
-    </div>
+    <!-- Why SkillSwap Section -->
+    <section class="flex items-center justify-center py-16 bg-[#EEE8DC]">
+        <div class="text-center max-w-3xl">
+            <h2 class="text-4xl md:text-5xl font-bold text-black">Learn & Teach for Free!</h2>
+            <p class="text-lg text-[#5C5246] mt-4">Find a mentor, improve your skills, and contribute to a knowledge-sharing community.</p>
+        </div>
     </section>
 
-    <section class="container mx-auto py-12 px-4 text-center bg-white mb-25">
-      <div class="grid md:grid-cols-3 gap-12 mb-12">
-        <!-- Skill Marketplace -->
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-            <div class="flex justify-center mb-4">
-                <img src="https://img.icons8.com/ios/452/cloud.png" alt="Skill Marketplace" class="w-16 h-16"/>
-            </div>
-            <h3 class="text-2xl font-bold mb-4">Skill Marketplace</h3>
-            <p class="text-gray-600">
-                Browse a diverse catalog of skills and knowledge areas, from cooking and coding to photography and foreign languages. Find what piques your interest.
-            </p>
-        </div>
-        
-        <!-- New Interface -->
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-            <div class="flex justify-center mb-4">
-                <img src="https://img.icons8.com/ios/452/light-on.png" alt="New Interface" class="w-16 h-16"/>
-            </div>
-            <h3 class="text-2xl font-bold mb-4">New Interface</h3>
-            <p class="text-gray-600">
-                Connect with people who share your passion for learning and teaching. Propose skill swaps, schedule sessions, and get ready to trade knowledge.
-            </p>
-        </div>
+    <!-- Features Section -->
+    <section class="container mx-auto py-16 px-6 text-center">
+        <div class="grid md:grid-cols-3 gap-8">
+            {% set features = [
+                { icon: 'https://img.icons8.com/ios/452/cloud.png', title: 'Skill Marketplace', text: 'Explore a diverse range of skills – from coding to photography, languages to business.' },
+                { icon: 'https://img.icons8.com/ios/452/light-on.png', title: 'Seamless Connection', text: 'Find mentors and learners effortlessly. Swap skills and grow together!' },
+                { icon: 'https://img.icons8.com/ios/452/code.png', title: 'Vibrant Community', text: 'Join a thriving network of passionate individuals exchanging knowledge every day.' }
+            ] %}
 
-        <!-- SkillSwap -->
-        <div class="bg-white p-6 rounded-lg shadow-lg">
-            <div class="flex justify-center mb-4">
-                <img src="https://img.icons8.com/ios/452/code.png" alt="SkillSwap" class="w-16 h-16"/>
-            </div>
-            <h3 class="text-2xl font-bold mb-4">SkillSwap</h3>
-            <p class="text-gray-600">
-                SkillSwap is all about the joy of learning and sharing. No matter your skill level, you can be a valuable contributor and learner in this vibrant community.
-            </p>
+            {% for feature in features %}
+                <div class="bg-[#F8F5ED] p-8 rounded-xl shadow-md hover:shadow-lg transition transform hover:scale-105">
+                    <div class="flex justify-center mb-4">
+                        <img src="{{ feature.icon }}" alt="{{ feature.title }}" class="w-16 h-16"/>
+                    </div>
+                    <h3 class="text-2xl font-semibold mb-3 text-black">{{ feature.title }}</h3>
+                    <p class="text-[#5C5246]">{{ feature.text }}</p>
+                </div>
+            {% endfor %}
         </div>
-    </div>
     </section>
-    <section class="container mx-auto py-12 px-4 flex items-center bg-gray-100 border-t-4 border-indigo-600">
 
-    <!-- Image à gauche -->
-    <div class="w-full md:w-1/2 mb-6 md:mb-0">
-        <img src="{{ asset('image/image1.png') }}" alt="About Us" class="w-full rounded-lg shadow-xl">
-    </div>
-    
-    <!-- Texte à droite -->
-    <div class="w-full md:w-1/2 pl-0 md:pl-12 text-black">
-        <h2 class="text-3xl font-bold mb-4">About Us</h2>
-        <p class="text-lg text-gray-700">
-            We are a team of passionate individuals who believe in the power of knowledge sharing and skill exchange. SkillSwap is dedicated to connecting people from all over the world, allowing them to teach, learn, and grow together. Whether you’re a beginner or an expert, our platform helps you discover new skills, build relationships, and empower others to achieve their goals.
-        </p>
-        <p class="text-lg text-gray-700 mt-4">
-            Join us today and start your journey towards learning something new, while making valuable connections with like-minded people.
-        </p>
-    </div>
-</section>
-
-<footer class="bg-gray-800 text-white py-2 mt-12">
-    <div class="container mx-auto text-center">
-        <div class="mb-4">
-            <p>&copy; 2025 SkillSwap. All rights reserved.</p>
+    <!-- About Us Section -->
+    <section class="container mx-auto py-16 px-6 flex flex-col md:flex-row items-center bg-[#E5DED1] rounded-xl shadow-lg">
+        <div class="w-full md:w-1/2 mb-6 md:mb-0">
+            <img src="{{ asset('image/image1.png') }}" alt="About Us" class="w-full rounded-xl shadow-lg">
         </div>
-       
-    </div>
-</footer>
-
+        <div class="w-full md:w-1/2 md:pl-12 text-center md:text-left">
+            <h2 class="text-3xl font-bold text-black mb-4">About Us</h2>
+            <p class="text-lg text-[#5C5246]">
+                At SkillSwap, we believe in the power of sharing knowledge. Connect, teach, and learn globally with like-minded individuals.
+            </p>
+            <p class="text-lg text-[#5C5246] mt-4">
+                Join our platform today and discover how skill-sharing can change lives.
+            </p>
+        </div>
+    </section>
 {% endblock %}

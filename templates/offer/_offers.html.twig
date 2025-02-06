@@ -1,0 +1,21 @@
+{% if pagination.items is empty %}
+    <p class="text-gray-500">Aucune offre trouvée.</p>
+{% else %}
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for offer in pagination.items %}
+            <div class="bg-white shadow-md rounded-lg p-4">
+                <h3 class="text-xl font-semibold">{{ offer.title }}</h3>
+                <p class="text-gray-600">{{ offer.description }}</p>
+                <a href="{{ path('offer_show', { id: offer.id }) }}" 
+                   class="block mt-3 text-blue-500 hover:underline">
+                    Voir l'offre →
+                </a>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<!-- Pagination -->
+<div class="mt-6">
+    {{ knp_pagination_render(pagination) }}
+</div>

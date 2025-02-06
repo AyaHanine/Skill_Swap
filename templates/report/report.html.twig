@@ -1,0 +1,30 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Signaler une offre{% endblock %}
+
+{% block body %}
+    <div class="container">
+        <h1>Signaler cette offre</h1>
+
+        {# Afficher les messages flash (success ou error) #}
+        {% for label, messages in app.flashes %}
+            <div class="alert alert-{{ label }}">
+                {% for message in messages %}
+                    <p>{{ message }}</p>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        {# Afficher le formulaire de signalement #}
+        <form method="post">
+            {{ form_start(form) }}
+            
+            <div class="mb-3">
+                {{ form_row(form.reason) }}  {# Affiche le champ de raison du signalement #}
+            </div>
+            <button type="submit" class="btn btn-primary">Envoyer le signalement</button>
+            {{ form_end(form) }}
+        </form>
+        {# Bouton pour retourner à la page de l'offre #}
+        
+{% endblock %}

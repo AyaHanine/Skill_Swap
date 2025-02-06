@@ -18,11 +18,13 @@ class Conversation
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
-    /**
-     * @var Collection<int, user>
-     */
-    #[ORM\ManyToMany(targetEntity: User::class, inversedBy: 'conversations')]
-    private Collection $users;
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private User $userOne;
+
+    #[ORM\ManyToOne(targetEntity: User::class)]
+    #[ORM\JoinColumn(nullable: false)]
+    private User $userTwo;
 
     /**
      * @var Collection<int, message>
@@ -56,27 +58,29 @@ class Conversation
     /**
      * @return Collection<int, User>
      */
-    public function getUsers(): Collection
+    public function getUserOne(): User
     {
-        return $this->users;
+        return $this->userOne;
     }
 
-    public function addUser(User $user): static
+    public function setUserOne(User $userOne): static
     {
-        if (!$this->users->contains($user)) {
-            $this->users->add($user);
-        }
+        $this->userOne = $userOne;
 
         return $this;
     }
 
-    public function removeUser(User $user): static
+    public function getUserTwo(): User
     {
-        $this->users->removeElement($user);
+        return $this->userTwo;
+    }
+
+    public function setUserTwo(User $userTwo): static
+    {
+        $this->userTwo = $userTwo;
 
         return $this;
     }
-
     /**
      * @return Collection<int, Message>
      */

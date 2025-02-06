@@ -1,0 +1,66 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des compétences{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-4 text-primary">Gestion des compétences</h1>
+
+        <!-- Bouton pour ajouter une compétence -->
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{{ path('add_skill') }}" class="btn btn-outline-success btn-lg">Ajouter une compétence</a>
+        </div>
+
+        <!-- Formulaire de recherche -->
+        {{ form_start(form, {'attr': {'class': 'mb-4 flex space-x-2'}}) }}
+            {{ form_widget(form.name, {'attr': {'class': 'w-1/2 p-2 border border-gray-300 rounded-lg'}}) }}
+            {{ form_widget(form.status, {'attr': {'class': 'w-1/3 p-2 border border-gray-300 rounded-lg'}}) }}
+            <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition duration-200">
+                🔍 Rechercher
+            </button>
+        {{ form_end(form) }}
+
+        <!-- Tableau des compétences -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <table class="table table-hover table-striped">
+                    <thead class="table-dark">
+                        <tr>
+                            <th scope="col">Nom</th>
+                            <th scope="col">Statut</th>
+                            <th scope="col" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for skill in skills %}
+                            <tr>
+                                <td>{{ skill.name }}</td>
+                                <td>
+                                    <span class="badge {% if skill.status == 'en attente' %}bg-warning text-dark{% elseif skill.status.value == 'validé' %}bg-success{% else %}bg-secondary{% endif %}">
+                                        {{ skill.status.value }}
+                                    </span>
+                                </td>
+                                <td class="text-center">
+                                    {% if skill.status.value == 'en attente' %}
+                                        <a href="{{ path('validate_skill', {'id': skill.id}) }}" class="btn btn-outline-success btn-sm mx-1" title="Valider cette compétence">
+                                            <i class="fas fa-check-circle"></i> Valider
+                                        </a>
+                                        <a href="{{ path('reject_skill', {'id': skill.id}) }}" class="btn btn-outline-danger btn-sm mx-1" title="Rejeter cette compétence">
+                                            <i class="fas fa-times-circle"></i> Rejeter
+                                        </a>
+                                    
+                                    {% endif %}
+                                    {% if skill.status.value == 'validé' %}
+                                        <a href="{{ path('delete_skill', {'id': skill.id}) }}" class="btn btn-outline-danger btn-sm mx-1" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cette compétence ?')" title="Supprimer cette compétence">
+                                            <i class="fas fa-trash-alt"></i> Supprimer
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

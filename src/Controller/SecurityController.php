@@ -43,4 +43,13 @@ class SecurityController extends AbstractController
         return $this->render('security/wait_for_verification.html.twig');
     }
 
+    #[Route('/banned', name: 'banned_message')]
+    public function banned(): Response
+    {
+
+
+        return $this->render('banned_message.html.twig');
+    }
+
+
 }

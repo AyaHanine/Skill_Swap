@@ -2,10 +2,15 @@
 
 namespace App\Controller;
 
+use App\Entity\Conversation;
 use App\Entity\Notification;
 use App\Entity\Offer;
 use App\Entity\Request;
+use App\Entity\User;
+use App\Enum\OfferStatus;
+use App\Enum\RequestStatus;
 use App\Form\RequestType;
+use App\Repository\OfferRepository;
 use App\Repository\RequestRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -17,13 +22,26 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/request')]
 final class RequestController extends AbstractController
 {
-    #[Route(name: 'app_request_index', methods: ['GET'])]
+    #[Route('/request', name: 'request_index')]
     public function index(RequestRepository $requestRepository): Response
     {
+        $user = $this->getUser();
+        if (!$user) {
+            return $this->redirectToRoute('security_login');
+        }
+
         return $this->render('request/index.html.twig', [
-            'requests' => $requestRepository->findAll(),
+            'sentRequests' => $requestRepository->findBy(['user' => $user]),
+            'receivedRequests' => $requestRepository->createQueryBuilder('r')
+                ->leftJoin('r.offer', 'o')
+                ->where('o.user = :user')
+                ->setParameter('user', $user)
+                ->getQuery()
+                ->getResult(),
         ]);
     }
+
+
 
     #[Route('/new', name: 'app_request_new', methods: ['GET', 'POST'])]
     public function new(HttpRequest $request, EntityManagerInterface $entityManager): Response
@@ -83,39 +101,57 @@ final class RequestController extends AbstractController
     }
 
     #[Route('/send/{id}', name: 'request_send', methods: ['POST'])]
-    public function sendRequest(Offer $offer, \Symfony\Component\HttpFoundation\Request $request, EntityManagerInterface $entityManager): JsonResponse
-    {
+    public function sendRequest(
+        HttpRequest $request,
+        EntityManagerInterface $entityManager,
+        OfferRepository $offerRepository,
+        int $id
+    ): JsonResponse {
 
 
+        // Récupérer l'utilisateur connecté
         $user = $this->getUser();
         if (!$user) {
             return new JsonResponse(['message' => 'Vous devez être connecté pour envoyer une demande.'], Response::HTTP_UNAUTHORIZED);
         }
 
+        // Récupérer l'offre via son ID
+        $offer = $offerRepository->find($id);
+        if (!$offer) {
+            return new JsonResponse(['message' => 'Offre non trouvée.'], Response::HTTP_NOT_FOUND);
+        }
+
+        // Vérifier que l'utilisateur ne postule pas à sa propre offre
         if ($offer->getUser() === $user) {
             return new JsonResponse(['message' => 'Vous ne pouvez pas envoyer une demande pour votre propre offre.'], Response::HTTP_FORBIDDEN);
         }
 
-        // 🚨 Bloquer les demandes si l'offre est réservée
-        if ($offer->getStatus() === 'reserved') {
-            return new JsonResponse(['message' => 'Cette offre est déjà réservée. Vous ne pouvez plus envoyer de demande.'], Response::HTTP_BAD_REQUEST);
+        // Vérifier que le statut de l'offre est bien "disponible"
+        if ($offer->getStatus() !== OfferStatus::Disponible) {
+            return new JsonResponse(['error' => 'Cette offre n\'est pas disponible.'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Vérifier si les données JSON sont valides
+        // Vérifier si l'utilisateur a déjà fait une demande pour cette offre
+        $existingRequest = $entityManager->getRepository(Request::class)->findOneBy([
+            'user' => $user,
+            'offer' => $offer
+        ]);
+
+        if ($existingRequest) {
+            return new JsonResponse(['message' => 'Vous avez déjà envoyé une demande pour cette offre.']);
+        }
+
+        // Récupérer le message depuis le JSON envoyé par le front
         $data = json_decode($request->getContent(), true);
-        if ($data === null) {
-            return new JsonResponse(['message' => 'Format JSON invalide.'], Response::HTTP_BAD_REQUEST);
-        }
-
-
         $message = $data['message'] ?? '';
 
+        // Créer une nouvelle demande
         $requestEntity = new Request();
         $requestEntity->setUser($user);
         $requestEntity->setOffer($offer);
         $requestEntity->setMessage($message);
-        $requestEntity->setStatus('pending');
-
+        $requestEntity->setStatus(RequestStatus::EnAttente);
+        $requestEntity->setCreatedAt(new \DateTimeImmutable());
 
         $entityManager->persist($requestEntity);
 
@@ -125,14 +161,17 @@ final class RequestController extends AbstractController
         $notification->setMessage("Vous avez reçu une nouvelle demande de la part de {$user->getFirstName()} {$user->getLastName()} !");
         $notification->setCreatedAt(new \DateTimeImmutable());
         $notification->setIsRead(false);
+
         $entityManager->persist($notification);
         $entityManager->flush();
 
-        return new JsonResponse(['message' => 'Votre demande a bien été envoyée !'], 200);
-
+        return new JsonResponse(['success' => 'Demande envoyée avec succès !'], Response::HTTP_CREATED);
     }
 
-    #[Route('/request/{id}/accept', name: 'request_accept', methods: ['POST', 'GET'])]
+
+
+
+    #[Route('/{id}/accept', name: 'request_accept', methods: ['POST', 'GET'])]
     public function acceptRequest(Request $requestEntity, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();
@@ -143,13 +182,33 @@ final class RequestController extends AbstractController
         }
 
         // Mettre la demande à "acceptée"
-        $requestEntity->setStatus('accepted');
+        $requestEntity->setStatus(RequestStatus::Acceptee);
 
         // Changer le statut de l'offre à "réservée"
         $offer = $requestEntity->getOffer();
-        $offer->setStatus('reserved');
+        $offer->setStatus(OfferStatus::Reserve);
 
         $entityManager->flush();
+
+        // Vérifier si une conversation existe déjà entre ces deux utilisateurs
+        $existingConversation = $entityManager->getRepository(Conversation::class)->findOneBy([
+            'userOne' => $requestEntity->getUser(),
+            'userTwo' => $requestEntity->getOffer()->getUser(),
+        ]) ?? $entityManager->getRepository(Conversation::class)->findOneBy([
+                        'userOne' => $requestEntity->getUser(),
+                        'userTwo' => $requestEntity->getOffer()->getUser(),
+                    ]);
+
+        if (!$existingConversation) {
+            // Créer une nouvelle conversation
+            $conversation = new Conversation();
+            $conversation->setUserOne($requestEntity->getUser());
+            $conversation->setUserTwo($requestEntity->getOffer()->getUser());
+            $conversation->setCreatedAt(new \DateTimeImmutable());
+
+            $entityManager->persist($conversation);
+            $entityManager->flush();
+        }
 
         // Notifier l'utilisateur demandeur
         $notification = new Notification();
@@ -165,7 +224,7 @@ final class RequestController extends AbstractController
         return $this->redirectToRoute('dashboard');
     }
 
-    #[Route('/request/{id}/decline', name: 'request_decline', methods: ['POST', 'GET'])]
+    #[Route('/{id}/decline', name: 'request_decline', methods: ['POST', 'GET'])]
     public function declineRequest(Request $requestEntity, EntityManagerInterface $entityManager): Response
     {
         $user = $this->getUser();

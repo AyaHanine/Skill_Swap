@@ -1,0 +1,36 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Utilisateurs Bannis{% endblock %}
+
+{% block body %}
+    <div class="container mx-auto p-6">
+        <h1 class="text-2xl font-bold mb-4">Liste des Utilisateurs Bannis</h1>
+        
+        {% if bannedUsers is empty %}
+            <p class="text-gray-500">Aucun utilisateur n'est actuellement banni.</p>
+        {% else %}
+            <div class="overflow-x-auto">
+                <table class="min-w-full bg-white border border-gray-300 shadow-md rounded-lg">
+                    <thead class="bg-gray-200">
+                        <tr>
+                            <th class="py-2 px-4 border-b">Nom</th>
+                                                        <th class="py-2 px-4 border-b">Prénom</th>
+
+                            <th class="py-2 px-4 border-b">Email</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in bannedUsers %}
+                            <tr class="border-b">
+                                <td class="py-2 px-4">{{ user.lastName }}</td>
+                                                                <td class="py-2 px-4">{{ user.firstName }}</td>
+
+                                <td class="py-2 px-4">{{ user.email }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

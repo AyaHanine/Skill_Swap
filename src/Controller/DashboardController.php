@@ -45,6 +45,7 @@ final class DashboardController extends AbstractController
             'unread_messages' => $unreadMessages,
             'user_reviews' => $userReviews,
             'requests' => $requests,
+            'User' => $user
         ]);
     }
 }

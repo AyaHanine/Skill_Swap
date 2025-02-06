@@ -5,6 +5,7 @@ namespace App\Repository;
 use App\Entity\Offer;
 use Doctrine\Bundle\DoctrineBundle\Repository\ServiceEntityRepository;
 use Doctrine\Persistence\ManagerRegistry;
+use App\Entity\User;
 
 /**
  * @extends ServiceEntityRepository<Offer>
@@ -50,4 +51,18 @@ class OfferRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+    public function findOffersForUser(User $user)
+    {
+
+        return $this->createQueryBuilder('o')
+            ->leftJoin('o.skillWanted', 'sr') // Compétence requise pour l'offre
+            ->leftJoin('o.user', 'u') // Ajout de la relation avec l'utilisateur qui a posté l'offre
+            ->leftJoin('u.skills', 'us') // L'utilisateur connecté et ses compétences
+            ->where('us.id = sr.id')  // Vérifie si l'utilisateur possède la compétence requise
+            ->orWhere('o.isNegotiable = true') // Inclut les offres négociables
+            ->getQuery()
+            ->getResult();
+    }
+
 }

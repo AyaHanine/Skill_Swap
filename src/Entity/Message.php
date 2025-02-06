@@ -27,6 +27,9 @@ class Message
     #[ORM\JoinColumn(nullable: false)]
     private ?User $receiver = null;
 
+    #[ORM\ManyToOne(targetEntity: Conversation::class, inversedBy: "messages")]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Conversation $conversation = null;
 
 
 

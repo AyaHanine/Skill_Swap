@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\OfferStatus;
 use App\Repository\OfferRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -24,8 +25,8 @@ class Offer
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
-    private ?string $status = null;
+    #[ORM\Column(type: 'string', enumType: OfferStatus::class)]
+    private ?OfferStatus $status = null;
 
     #[ORM\ManyToOne(inversedBy: 'offers')]
     private ?User $user = null;
@@ -33,7 +34,7 @@ class Offer
     /**
      * @var Collection<int, Request>
      */
-    #[ORM\OneToMany(targetEntity: Request::class, mappedBy: 'offer')]
+    #[ORM\OneToMany(targetEntity: Request::class, mappedBy: 'offer', cascade: ['remove'])]
     private Collection $requests;
 
     /**
@@ -42,12 +43,32 @@ class Offer
     #[ORM\OneToMany(targetEntity: Review::class, mappedBy: 'offer')]
     private Collection $reviews;
 
+    #[ORM\Column(type: 'boolean')]
+    private bool $isNegotiable = false;
+
+    /**
+     * @var Collection<int, Report>
+     */
+    #[ORM\OneToMany(targetEntity: Report::class, mappedBy: 'Offer')]
+    private Collection $reports;
+
+    #[ORM\ManyToOne(inversedBy: 'OffersAsWantedSkill')]
+    #[ORM\JoinColumn(nullable: false)]
+    private ?Skill $wantedSkill = null;
+
+    #[ORM\ManyToOne(inversedBy: 'OffersAsSkillOffered')]
+    #[ORM\JoinColumn(nullable: false)]
+
+    private ?Skill $offeredSkill = null;
+
+
 
 
     public function __construct()
     {
         $this->requests = new ArrayCollection();
         $this->reviews = new ArrayCollection();
+        $this->reports = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -91,12 +112,12 @@ class Offer
         return $this;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): ?OfferStatus
     {
         return $this->status;
     }
 
-    public function setStatus(?string $status): static
+    public function setStatus(OfferStatus $status): static
     {
         $this->status = $status;
 
@@ -169,4 +190,92 @@ class Offer
 
         return $this;
     }
+
+    public function getSkillOffered(): ?Skill
+    {
+        return $this->offeredSkill;
+    }
+
+    public function setSkillOffered(Skill $skillOffered): self
+    {
+        $this->offeredSkill = $skillOffered;
+        return $this;
+    }
+
+    public function getSkillWanted(): ?Skill
+    {
+        return $this->wantedSkill;
+    }
+
+    public function setSkillWanted(Skill $skillWanted): self
+    {
+        $this->wantedSkill = $skillWanted;
+        return $this;
+    }
+
+    public function isNegotiable(): bool
+    {
+        return $this->isNegotiable;
+    }
+
+    public function setNegotiable(bool $isNegotiable): self
+    {
+        $this->isNegotiable = $isNegotiable;
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Report>
+     */
+    public function getReports(): Collection
+    {
+        return $this->reports;
+    }
+
+    public function addReport(Report $report): static
+    {
+        if (!$this->reports->contains($report)) {
+            $this->reports->add($report);
+            $report->setOffer($this);
+        }
+
+        return $this;
+    }
+
+    public function removeReport(Report $report): static
+    {
+        if ($this->reports->removeElement($report)) {
+            // set the owning side to null (unless already changed)
+            if ($report->getOffer() === $this) {
+                $report->setOffer(null);
+            }
+        }
+
+        return $this;
+    }
+
+    public function getWantedSkill(): ?Skill
+    {
+        return $this->wantedSkill;
+    }
+
+    public function setWantedSkill(?Skill $wantedSkill): static
+    {
+        $this->wantedSkill = $wantedSkill;
+
+        return $this;
+    }
+
+    public function getOfferedSkill(): ?Skill
+    {
+        return $this->offeredSkill;
+    }
+
+    public function setOfferedSkill(?Skill $offeredSkill): static
+    {
+        $this->offeredSkill = $offeredSkill;
+
+        return $this;
+    }
+
 }

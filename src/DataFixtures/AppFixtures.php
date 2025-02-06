@@ -24,19 +24,6 @@ class AppFixtures extends Fixture
     {
         $faker = Factory::create();
 
-        // Création des utilisateurs
-        $users = [];
-        for ($i = 0; $i < 10; $i++) {
-            $user = new User();
-            $user->setEmail($faker->email);
-            $user->setFirstName($faker->firstName);
-            $user->setLastName($faker->lastName);
-            $user->setPassword($this->passwordHasher->hashPassword($user, 'password'));
-            $user->setRoles(['ROLE_USER']);
-            $user->setIsVerified(true); // Simulation d'un email vérifié
-            $manager->persist($user);
-            $users[] = $user;
-        }
 
         // Création de compétences (Skills)
         $skills = [];
@@ -45,32 +32,26 @@ class AppFixtures extends Fixture
         foreach ($skillNames as $name) {
             $skill = new Skill();
             $skill->setName($name);
-            $skill->setCategory($faker->word);
             $manager->persist($skill);
             $skills[] = $skill;
         }
 
-        // Création des offres
-        for ($i = 0; $i < 15; $i++) {
-            $offer = new Offer();
-            $offer->setTitle($faker->sentence(4));
-            $offer->setDescription($faker->paragraph);
-            $offer->setUser($faker->randomElement($users));
-            $offer->setCreatedAt(new \DateTimeImmutable());
-            $offer->setStatus('active');
-            $manager->persist($offer);
-        }
+        // Créer un utilisateur "admin"
+        $adminUser = new User();
+        $adminUser->setFirstName('admin')
+            ->setEmail('admin@gmail.com')
+            ->setRoles(['ROLE_ADMIN']);
 
-        // Création des demandes d’échange (Requests)
-        for ($i = 0; $i < 10; $i++) {
-            $request = new Request();
-            $request->setMessage($faker->sentence);
-            $request->setUser($faker->randomElement($users));
-            $request->setOffer($faker->randomElement($manager->getRepository(Offer::class)->findAll()));
-            $request->setStatus('pending');
-            $request->setCreatedAt(new \DateTimeImmutable());
-            $manager->persist($request);
-        }
+        // Encoder le mot de passe
+        $encodedPassword = $this->passwordHasher->hashPassword($adminUser, 'adminpassword');
+        $adminUser->setPassword($encodedPassword);
+
+        // Persist et flush
+        $manager->persist($adminUser);
+
+
+
+
 
         $manager->flush();
     }

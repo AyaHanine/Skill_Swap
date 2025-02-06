@@ -1,0 +1,69 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des signalements{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-4 text-primary">Gestion des signalements</h1>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h3>Signalements sur les utilisateurs</h3>
+                <table class="table table-hover table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Nom d'utilisateur</th>
+                            <th scope="col">Signalements</th>
+                            <th scope="col" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>{{ user.lastName }} {{user.firstName}}</td>
+                                <td>{{reportedUser}}</td>
+                                <td class="text-center">
+                                    {% if reportedUser >= 3 %}
+                                        <span class="badge bg-danger">Banni</span>
+                                    {% else %}
+                                        <a href="{{ path('admin_ban_user', {'id': user.id}) }}" class="btn btn-danger btn-sm">
+                                            Bannir
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                <h3>Signalements sur les offres</h3>
+                <table class="table table-hover table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Titre de l'offre</th>
+                            <th scope="col">Signalements</th>
+                            <th scope="col" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for offer in offers %}
+                            <tr>
+                                <td>{{ offer.title }}</td>
+                                <td>{{ reportedOffer }}</td>
+                                <td class="text-center">
+                                    {% if reportedOffer >= 3 %}
+                                        <span class="badge bg-danger">Banni</span>
+                                    {% else %}
+                                        <a href="{{ path('admin_ban_offer', {'id': offer.id}) }}" class="btn btn-danger btn-sm">
+                                            Bannir l'utilisateur
+                                        </a>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

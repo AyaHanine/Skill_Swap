@@ -2,6 +2,7 @@
 
 namespace App\Entity;
 
+use App\Enum\RequestStatus;
 use App\Repository\RequestRepository;
 use Doctrine\ORM\Mapping as ORM;
 
@@ -13,8 +14,8 @@ class Request
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $status = null;
+    #[ORM\Column(type: 'string', enumType: RequestStatus::class)]
+    private ?RequestStatus $status = null;
 
     #[ORM\Column(length: 255)]
     private ?string $message = null;
@@ -33,12 +34,12 @@ class Request
         return $this->id;
     }
 
-    public function getStatus(): ?string
+    public function getStatus(): ?RequestStatus
     {
         return $this->status;
     }
 
-    public function setStatus(string $status): static
+    public function setStatus(RequestStatus $status): static
     {
         $this->status = $status;
 

@@ -50,6 +50,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $bio = null;
 
+    #[ORM\OneToMany(mappedBy: "repportedUser", targetEntity: Report::class, cascade: ["persist", "remove"])]
+    private Collection $reports;
+
+
     #[ORM\Column(length: 255, nullable: true)]
     private ?string $profilePicture = null;
 
@@ -83,11 +87,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     #[ORM\OneToMany(targetEntity: Notification::class, mappedBy: 'user')]
     private Collection $notifications;
 
-    /**
-     * @var Collection<int, Payment>
-     */
-    #[ORM\OneToMany(targetEntity: Payment::class, mappedBy: 'user')]
-    private Collection $payments;
+
 
     /**
      * @var Collection<int, Conversation>
@@ -111,7 +111,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         $this->requests = new ArrayCollection();
         $this->messages = new ArrayCollection();
         $this->notifications = new ArrayCollection();
-        $this->payments = new ArrayCollection();
         $this->conversations = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
         $this->reviews = new ArrayCollection();
@@ -430,35 +429,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    /**
-     * @return Collection<int, Payment>
-     */
-    public function getPayments(): Collection
-    {
-        return $this->payments;
-    }
-
-    public function addPayment(Payment $payment): static
-    {
-        if (!$this->payments->contains($payment)) {
-            $this->payments->add($payment);
-            $payment->setUser($this);
-        }
-
-        return $this;
-    }
-
-    public function removePayment(Payment $payment): static
-    {
-        if ($this->payments->removeElement($payment)) {
-            // set the owning side to null (unless already changed)
-            if ($payment->getUser() === $this) {
-                $payment->setUser(null);
-            }
-        }
-
-        return $this;
-    }
 
     /**
      * @return Collection<int, Conversation>

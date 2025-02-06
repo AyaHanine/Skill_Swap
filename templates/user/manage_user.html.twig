@@ -1,0 +1,51 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Gestion des utilisateurs{% endblock %}
+
+{% block body %}
+    <div class="container mt-5">
+        <h1 class="text-center mb-4 text-primary">Gestion des utilisateurs</h1>
+
+        <!-- Bouton pour ajouter un utilisateur -->
+        <div class="d-flex justify-content-end mb-3">
+            <a href="{{ path('add_user') }}" class="btn btn-success btn-lg">Ajouter un utilisateur</a>
+        </div>
+
+        <!-- Tableau des utilisateurs -->
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <table class="table table-hover table-striped">
+                    <thead class="thead-dark">
+                        <tr>
+                            <th scope="col">Nom d'utilisateur</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Rôle</th>
+                            <th scope="col" class="text-center">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in users %}
+                            <tr>
+                                <td>{{ user.firstName }} {{user.lastName}}</td>
+                                <td>{{ user.email }}</td>
+                                <td>
+                                    {% for role in user.roles %}
+                                        <span class="badge bg-info">{{ role }}</span>
+                                    {% endfor %}
+                                </td>
+                                <td class="text-center">
+                                    <a href="{{ path('edit_user', {'id': user.id}) }}" class="btn btn-warning btn-sm mx-1" title="Modifier cet utilisateur">
+                                        <i class="fas fa-edit"></i> Modifier
+                                    </a>
+                                    <a href="{{ path('delete_user', {'id': user.id}) }}" class="btn btn-danger btn-sm mx-1" onclick="return confirm('Êtes-vous sûr de vouloir supprimer cet utilisateur ?')" title="Supprimer cet utilisateur">
+                                        <i class="fas fa-trash-alt"></i> Supprimer
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}

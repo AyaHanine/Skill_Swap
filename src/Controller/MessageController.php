@@ -24,8 +24,9 @@ final class MessageController extends AbstractController
     }
 
     #[Route('/send', name: 'send_message', methods: ['POST'])]
-    public function sendMessage(Request $request, EntityManagerInterface $entityManager): JsonResponse
+    public function sendMessage(Request $request, EntityManagerInterface $entityManager, HubInterface $hub): JsonResponse
     {
+
         $data = json_decode($request->getContent(), true);
         $sender = $this->getUser();
         $receiver = $entityManager->getRepository(User::class)->find($data['receiverId']);
@@ -33,6 +34,13 @@ final class MessageController extends AbstractController
         if (!$receiver) {
             return new JsonResponse(['error' => 'Utilisateur non trouvé'], 404);
         }
+
+        // Vérifier si le message est vide
+        if (!isset($data['message']) || empty($data['message'])) {
+            return new JsonResponse(['error' => 'Message vide'], 400);
+        }
+
+        $conversationId = $data['conversation_id'];
 
         $message = new Message();
         $message->setContent($data['content']);
@@ -42,7 +50,23 @@ final class MessageController extends AbstractController
         $entityManager->persist($message);
         $entityManager->flush();
 
-        return new JsonResponse(['message' => 'Message envoyé !'], 200);
+        // Définir un topic basé sur l'ID de la conversation
+        $topic = 'http://localhost/chat/' . $conversationId;
+
+        // Publier le message en temps réel avec Mercure
+        $update = new Update(
+            $topic,
+            json_encode([
+                'sender' => $this->getUser()->getId(),
+                'message' => $data['message'],
+                'sentAt' => (new \DateTime())->format('Y-m-d H:i:s'),
+            ])
+        );
+
+        $hub->publish($update);
+
+        return new JsonResponse(['status' => 'Message envoyé']);
+
     }
 
 }
