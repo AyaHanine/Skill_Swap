@@ -8,9 +8,9 @@
 
      
  ### Comptes de test (Role / Email / Mot de passe) :
-USER : utilisateur0@exemple.com / motdepasse
-ADMIN : admin@exemple.com / admin
-BANNED : banni@exemple.com / banni
+- USER : user@gmail.com / userpassword2025
+- ADMIN : admin@gmail.com / adminpassword2025
+- BANNED : banned@exemple.com / BANNEDpassword2025
 
  ### Test fonctionnels et unitaires :
 Lancer docker-compose exec php php vendor/bin/phpunit tests/UserTest.php pour lancer les tests unitaires
