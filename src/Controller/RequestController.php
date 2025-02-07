@@ -100,35 +100,38 @@ final class RequestController extends AbstractController
         return $this->redirectToRoute('app_request_index', [], Response::HTTP_SEE_OTHER);
     }
 
-    #[Route('/send/{id}', name: 'request_send', methods: ['POST'])]
+    #[Route('/send/{id}', name: 'request_send', methods: ['POST', 'GET'])]
     public function sendRequest(
         HttpRequest $request,
         EntityManagerInterface $entityManager,
         OfferRepository $offerRepository,
         int $id
-    ): JsonResponse {
-
+    ): Response {
 
         // Récupérer l'utilisateur connecté
         $user = $this->getUser();
         if (!$user) {
-            return new JsonResponse(['message' => 'Vous devez être connecté pour envoyer une demande.'], Response::HTTP_UNAUTHORIZED);
+            $this->addFlash('error', 'Vous devez être connecté pour envoyer une demande.');
+            return $this->redirectToRoute('offer_index');
         }
 
         // Récupérer l'offre via son ID
         $offer = $offerRepository->find($id);
         if (!$offer) {
-            return new JsonResponse(['message' => 'Offre non trouvée.'], Response::HTTP_NOT_FOUND);
+            $this->addFlash('error', 'Offre non trouvée.');
+            return $this->redirectToRoute('offer_index');
         }
 
         // Vérifier que l'utilisateur ne postule pas à sa propre offre
         if ($offer->getUser() === $user) {
-            return new JsonResponse(['message' => 'Vous ne pouvez pas envoyer une demande pour votre propre offre.'], Response::HTTP_FORBIDDEN);
+            $this->addFlash('error', 'Vous ne pouvez pas envoyer une demande pour votre propre offre.');
+            return $this->redirectToRoute('offer_show', ['id' => $id]);
         }
 
         // Vérifier que le statut de l'offre est bien "disponible"
         if ($offer->getStatus() !== OfferStatus::Disponible) {
-            return new JsonResponse(['error' => 'Cette offre n\'est pas disponible.'], Response::HTTP_BAD_REQUEST);
+            $this->addFlash('error', 'Cette offre n\'est pas disponible.');
+            return $this->redirectToRoute('offer_show', ['id' => $id]);
         }
 
         // Vérifier si l'utilisateur a déjà fait une demande pour cette offre
@@ -138,7 +141,8 @@ final class RequestController extends AbstractController
         ]);
 
         if ($existingRequest) {
-            return new JsonResponse(['message' => 'Vous avez déjà envoyé une demande pour cette offre.']);
+            $this->addFlash('warning', 'Vous avez déjà envoyé une demande pour cette offre.');
+            return $this->redirectToRoute('offer_show', ['id' => $id]);
         }
 
         // Récupérer le message depuis le JSON envoyé par le front
@@ -165,7 +169,8 @@ final class RequestController extends AbstractController
         $entityManager->persist($notification);
         $entityManager->flush();
 
-        return new JsonResponse(['success' => 'Demande envoyée avec succès !'], Response::HTTP_CREATED);
+        $this->addFlash('success', 'Demande envoyée avec succès !');
+        return $this->redirectToRoute('offer_show', ['id' => $id]);
     }
 
 

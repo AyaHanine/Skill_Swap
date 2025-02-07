@@ -18,9 +18,22 @@
                                 {{ form_errors(form.email) }}
                             </div>
 
-                            <div class="mb-3">
+                                {{form_widget(form.lastName, {'attr': {'class': 'hidden'}})}}
+                                {{form_widget(form.firstName, {'attr': {'class': 'hidden'}})}}
+                                {{form_widget(form.bio, {'attr': {'class': 'hidden'}})}}
+                                {{form_widget(form.roles, {'attr': {'class': 'hidden'}})}}
+
+                            <div>
+
+               <div class="mb-3">
                                 {{ form_label(form.roles, 'Rôle', {'label_attr': {'class': 'form-label fw-bold'}}) }}
-                                {{ form_widget(form.roles, {'attr': {'class': 'form-select'}}) }}
+                                <div class="p-3 border rounded-lg bg-light">
+                                    {% for choice in form.roles.vars.choices %}
+                                        <label class="cursor-pointer px-4 py-2 bg-primary text-white rounded shadow-sm hover:bg-dark transition">
+                                            <input type="checkbox" name="{{ form.roles.vars.full_name }}[]" value="{{ choice.value }}" class="hidden" onclick="this.parentElement.classList.toggle('bg-secondary');"> {{ choice.label }}
+                                        </label>
+                                    {% endfor %}
+                                </div>
                                 {{ form_errors(form.roles) }}
                             </div>
 

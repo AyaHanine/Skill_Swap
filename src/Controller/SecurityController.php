@@ -2,17 +2,24 @@
 
 namespace App\Controller;
 
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bridge\Twig\Mime\TemplatedEmail;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Authentication\AuthenticationUtils;
+use SymfonyCasts\Bundle\VerifyEmail\Exception\VerifyEmailExceptionInterface;
+use App\Entity\User;
+use SymfonyCasts\Bundle\VerifyEmail\VerifyEmailHelperInterface;
 
 class SecurityController extends AbstractController
 {
+
+
     #[Route(path: '/login', name: 'security_login')]
     public function login(AuthenticationUtils $authenticationUtils): Response
     {
@@ -49,6 +56,37 @@ class SecurityController extends AbstractController
 
 
         return $this->render('banned_message.html.twig');
+    }
+
+
+    #[Route('/verify/email', name: 'verify_email')]
+    public function verifyUserEmail(Request $request, EntityManagerInterface $entityManager): Response
+    {
+        $userId = $request->query->get('id');
+
+        if (null === $userId) {
+            throw $this->createNotFoundException('Aucun ID utilisateur trouvé');
+
+        }
+
+        $user = $entityManager->getRepository(User::class)->find($userId);
+
+        if (null === $user) {
+            throw $this->createNotFoundException('utilisateur non trouvé');
+        }
+
+        try {
+            $this->verifyEmailHelper->validateEmailConfirmation($request->getUri(), $user->getId(), $user->getEmail());
+        } catch (VerifyEmailExceptionInterface $exception) {
+            $this->addFlash('error', $exception->getReason());
+            return $this->redirectToRoute('security_login');
+        }
+        $user->setIsVerified(true);
+        $user->setBio("tets");
+        $entityManager->flush();
+        $this->addFlash('success', 'Votre email a été vérifié avec succès ! Vous pouvez maintenant vous connecter.');
+
+        return $this->redirectToRoute('security_login');
     }
 
 

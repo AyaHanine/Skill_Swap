@@ -15,7 +15,7 @@ class Request
     private ?int $id = null;
 
     #[ORM\Column(type: 'string', enumType: RequestStatus::class)]
-    private ?RequestStatus $status = null;
+    private ?RequestStatus $status;
 
     #[ORM\Column(length: 255)]
     private ?string $message = null;

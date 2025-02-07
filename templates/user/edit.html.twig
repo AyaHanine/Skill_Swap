@@ -3,18 +3,56 @@
 {% block title %}Modifier mon profil{% endblock %}
 
 {% block body %}
-    <div class="container mt-4">
-        <h2>Modifier mes informations</h2>
-        {{ form_start(form) }}
-            {{ form_row(form.firstName) }}
-            {{ form_row(form.lastName) }}
-            {{ form_row(form.email) }}
-            {{ form_row(form.bio) }}
-            {{ form_row(form.skills) }}
-            {{ form_row(form.competence_autre) }}
-            <button type="submit" class="btn btn-success">Mettre à jour</button>
-        {{ form_end(form) }}
+    <div class="container mx-auto py-8 max-w-lg bg-white p-8 rounded-xl shadow-lg">
+        <h2 class="text-2xl font-bold text-center text-gray-900 mb-6">Modifier mes informations</h2>
+        
+        {{ form_start(form, {'attr': {'class': 'space-y-4'}}) }}
+            <div>
+                {{ form_label(form.firstName, 'Prénom', {'label_attr': {'class': 'block text-gray-700 font-semibold'}}) }}
+                {{ form_widget(form.firstName, {'attr': {'class': 'w-full px-4 py-3 border rounded-lg shadow-sm'}}) }}
+            </div>
+            
+            <div>
+                {{ form_label(form.lastName, 'Nom', {'label_attr': {'class': 'block text-gray-700 font-semibold'}}) }}
+                {{ form_widget(form.lastName, {'attr': {'class': 'w-full px-4 py-3 border rounded-lg shadow-sm'}}) }}
+            </div>
 
-        <a href="{{ path('dashboard') }}" class="btn btn-secondary mt-3">Retour</a>
+            <div>
+                {{ form_label(form.email, 'Email', {'label_attr': {'class': 'block text-gray-700 font-semibold'}}) }}
+                {{ form_widget(form.email, {'attr': {'class': 'w-full px-4 py-3 border rounded-lg shadow-sm'}}) }}
+            </div>
+            
+            <div>
+                {{ form_label(form.bio, 'Biographie', {'label_attr': {'class': 'block text-gray-700 font-semibold'}}) }}
+                {{ form_widget(form.bio, {'attr': {'class': 'w-full px-4 py-3 border rounded-lg shadow-sm'}}) }}
+            </div>
+            
+           <div class="mb-4">
+    {{ form_label(form.skills, 'Compétences', {'label_attr': {'class': 'block text-gray-700 font-semibold mb-2'}}) }}
+    <div class="bg-gray-100 p-4 rounded-lg shadow-inner">
+        {{ form_widget(form.skills, {'attr': {'class': 'hidden'}}) }}
+        <div class="flex flex-wrap gap-2">
+            {% for choice in form.skills.vars.choices %}
+                <label class="cursor-pointer px-4 py-2 bg-purple-600 text-white rounded-full shadow-md hover:bg-purple-700 transition">
+                    <input type="checkbox" name="{{ form.skills.vars.full_name }}[]" value="{{ choice.value }}" class="hidden" onclick="this.parentElement.classList.toggle('bg-purple-800');">
+                    {{ choice.label }}
+                </label>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+            
+            <div>
+                {{ form_label(form.competence_autre, 'Autres Compétences', {'label_attr': {'class': 'block text-gray-700 font-semibold'}}) }}
+                {{ form_widget(form.competence_autre, {'attr': {'class': 'w-full px-4 py-3 border rounded-lg shadow-sm'}}) }}
+            </div>
+            
+            <button type="submit" class="w-full bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-green-700 transition">Mettre à jour</button>
+        {{ form_end(form) }}
+        
+        <div class="text-center mt-4">
+            <a href="{{ path('dashboard') }}" class="text-purple-700 hover:underline">Retour</a>
+        </div>
     </div>
 {% endblock %}

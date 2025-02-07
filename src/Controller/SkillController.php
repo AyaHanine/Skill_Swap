@@ -146,7 +146,7 @@ final class SkillController extends AbstractController
 
         $this->addFlash('success', 'Compétence rejetée.');
 
-        return $this->redirectToRoute('app_skills');
+        return $this->redirectToRoute('app_skill');
     }
 
     #[Route('/{id}/validate', name: 'validate_skill')]

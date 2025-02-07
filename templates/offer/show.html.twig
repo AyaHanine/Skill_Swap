@@ -62,16 +62,19 @@
             {% endfor %}
 
             <!-- Conditions pour l'affichage du bouton d'envoi de demande -->
-            {% if offer.status.value != 'reservé' and (offer.isNegotiable or hasRequiredSkill) %}
-                <button class="bg-blue-600 text-white py-2 px-6 rounded-full mt-4 hover:bg-blue-700 transition duration-300" onclick="openRequestPopup()">
-                    Envoyer une demande
-                </button>
+            {% if offer.status.value != 'reservé' and offer.status.value != 'banni' and offer.status.value != 'terminé' and offer.status.value != 'annulé'  and (offer.isNegotiable or hasRequiredSkill) %}
+    <form method="POST" action="{{ path('request_send', { id: offer.id }) }}">
+        <input type="hidden" name="_token" value="{{ csrf_token('request_send' ~ offer.id) }}">
+        <button type="submit" class="bg-blue-600 text-white py-2 px-6 rounded-full mt-4 hover:bg-blue-700 transition duration-300">
+            Envoyer une demande
+        </button>
+    </form>
+{% endif %}
             {% elseif not offer.isNegotiable and not hasRequiredSkill %}
                 <p class="text-red-500">❌ Vous ne pouvez pas envoyer de demande car vous n'avez pas la compétence requise.</p>
             {% else %}
                 <p class="text-red-600 font-bold mt-4">Cette offre est réservée. Vous ne pouvez plus envoyer de demande.</p>
             {% endif %}
-        {% endif %}
 
         <!-- Popup pour envoyer une demande -->
         <div id="requestPopup" class="popup-overlay hidden fixed top-0 left-0 w-full h-full bg-black bg-opacity-50 flex items-center justify-center">
@@ -135,7 +138,7 @@
 
         function sendRequest(offerId) {
             let message = document.getElementById("requestMessage").value;
-            fetch(`/request/send/${offerId}`, {
+            fetch(/request/send/${offerId}, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",

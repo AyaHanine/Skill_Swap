@@ -1,11 +1,64 @@
 {% extends 'base.html.twig' %}
 
-{% block title %}New Offer{% endblock %}
+{% block title %}Créer une Offre{% endblock %}
 
 {% block body %}
-    <h1>Create new Offer</h1>
+    <div class="relative min-h-screen flex items-center justify-center py-10">
+        <!-- Background Design -->
+        <div class="absolute inset-0 flex items-center justify-center z-0">
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 opacity-80 w-3/4 h-3/4 rounded-2xl transform rotate-6"></div>
+        </div>
 
-    {{ include('offer/_form.html.twig') }}
+        <!-- Form Container -->
+        <div class="relative z-10 bg-white p-8 rounded-xl shadow-xl w-full max-w-lg">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-6">Créer une Nouvelle Offre</h2>
 
-    <a href="{{ path('offer_index') }}">back to list</a>
+            {{ form_start(form, {'attr': {'class': 'space-y-4'}}) }}
+                
+                <!-- Titre -->
+                <div>
+                    {{ form_label(form.title, 'Titre de l\'offre', {'label_attr': {'class': 'block text-gray-700 font-semibold'}}) }}
+                    {{ form_widget(form.title, {'attr': {'class': 'w-full px-4 py-3 border rounded-lg shadow-sm'}}) }}
+                </div>
+
+                <!-- Description -->
+                <div>
+                    {{ form_label(form.description, 'Description', {'label_attr': {'class': 'block text-gray-700 font-semibold'}}) }}
+                    {{ form_widget(form.description, {'attr': {'class': 'w-full px-4 py-3 border rounded-lg shadow-sm'}}) }}
+                </div>
+
+                <!-- Statut de l'offre -->
+                <div>
+                    {{ form_label(form.status, 'Statut de l\'offre', {'label_attr': {'class': 'block text-gray-700 font-semibold'}}) }}
+                    {{ form_widget(form.status, {'attr': {'class': 'w-full px-4 py-3 border rounded-lg shadow-sm'}}) }}
+                </div>
+
+                <!-- Compétences -->
+                <div class="flex space-x-4">
+                    <div class="w-1/2">
+                        {{ form_label(form.skillWanted, 'Compétence Recherchée', {'label_attr': {'class': 'block text-gray-700 font-semibold'}}) }}
+                        {{ form_widget(form.skillWanted, {'attr': {'class': 'w-full px-4 py-3 border rounded-lg shadow-sm'}}) }}
+                    </div>
+                    <div class="w-1/2">
+                        {{ form_label(form.skillOffered, 'Compétence Offerte', {'label_attr': {'class': 'block text-gray-700 font-semibold'}}) }}
+                        {{ form_widget(form.skillOffered, {'attr': {'class': 'w-full px-4 py-3 border rounded-lg shadow-sm'}}) }}
+                    </div>
+                </div>
+
+                <!-- Option Négociable -->
+                <div class="flex items-center space-x-2">
+                    {{ form_widget(form.negotiable, {'attr': {'class': 'w-5 h-5'}}) }}
+                    {{ form_label(form.negotiable, 'Compétence négociable ?', {'label_attr': {'class': 'text-gray-700 font-semibold'}}) }}
+                </div>
+
+                <!-- Bouton Soumettre -->
+                <button type="submit" class="w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700 transition duration-300 shadow-md">
+                    Publier l'Offre
+                </button>
+
+            {{ form_end(form) }}
+
+            <a href="{{ path('offer_index') }}" class="block text-center mt-4 text-blue-600 hover:text-blue-800">← Retour aux Offres</a>
+        </div>
+    </div>
 {% endblock %}

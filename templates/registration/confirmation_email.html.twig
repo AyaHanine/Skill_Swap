@@ -1,11 +1,29 @@
-<h1>Hi! Please confirm your email!</h1>
+{% extends 'base.html.twig' %}
 
-<p>
-    Please confirm your email address by clicking the following link: <br><br>
-    <a href="{{ signedUrl|raw }}">Confirm my Email</a>.
-    This link will expire in {{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}.
-</p>
+{% block body %}
+    <!-- Email Verification Page -->
+    <section class="container mx-auto py-16 px-6 flex justify-center relative">
+        <div class="w-full max-w-lg bg-white p-8 rounded-xl shadow-xl text-center relative z-10">
+            <h2 class="text-3xl font-bold text-gray-900 mb-6">Verify Your Email</h2>
+            
+            <p class="text-lg text-gray-700 mb-4">
+                Please confirm your email address by clicking the button below:
+            </p>
+            
+            <a href="{{ signedUrl|raw }}" class="px-6 py-3 bg-green-500 text-white font-semibold rounded-lg shadow-md hover:bg-green-600 transition">
+                Confirm My Email
+            </a>
+            
+            <p class="text-sm text-gray-500 mt-4">
+                This link will expire in <span class="font-bold">{{ expiresAtMessageKey|trans(expiresAtMessageData, 'VerifyEmailBundle') }}</span>.
+            </p>
+        </div>
 
-<p>
-    Cheers!
-</p>
+        <!-- Background Design -->
+        <div class="absolute inset-0 flex items-center justify-center z-0">
+            <div class="bg-gradient-to-r from-blue-500 to-indigo-600 opacity-80 w-3/4 h-3/4 rounded-2xl transform rotate-6"></div>
+        </div>
+    </section>
+
+   
+{% endblock %}

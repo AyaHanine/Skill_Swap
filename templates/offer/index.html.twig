@@ -3,110 +3,55 @@
 {% block title %}Mes Offres{% endblock %}
 
 {% block body %}
-    <style>
-        .container {
-            max-width: 1200px;
-            margin: auto;
-            padding: 20px;
-        }
-        .search-box, .filter-box {
-            display: flex;
-            justify-content: center;
-            margin-bottom: 20px;
-        }
-        .search-box input, .filter-box select {
-            padding: 10px;
-            width: 100%;
-            max-width: 400px;
-            border: 2px solid #ccc;
-            border-radius: 10px;
-        }
-        .offer-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-            margin-top: 20px;
-        }
-        .offer-card {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.1);
-            transition: transform 0.3s ease-in-out;
-        }
-        .offer-card:hover {
-            transform: scale(1.05);
-        }
-        .offer-title a {
-            font-size: 1.2rem;
-            color: #007BFF;
-            text-decoration: none;
-        }
-        .offer-title a:hover {
-            color: #0056b3;
-        }
-        .status-badge {
-            background: green;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-        }
-        .pagination {
-            text-align: center;
-            margin-top: 20px;
-        }
-    </style>
-
-    <div class="container">
-        <!-- Filtrage des offres -->
-        <div class="filter-box">
-            <form method="GET" action="{{ path('offer_index') }}">
-                <select name="type" onchange="this.form.submit()">
-                    <option value="all" {% if type == 'all' %}selected{% endif %}>Toutes les Offres</option>
-                    <option value="mine" {% if type == 'mine' %}selected{% endif %}>Mes Offres</option>
-                    <option value="matching" {% if type == 'matching' %}selected{% endif %}>Offres Qui Me Correspondent</option>
-                </select>
-            </form>
-        </div>
-
-        <!-- Barre de recherche -->
-        <div class="search-box">
-            <form method="GET" action="{{ path('offer_index') }}">
+    <div class="container mx-auto py-8">
+        <!-- Barre de recherche et bouton d'ajout d'offre -->
+        <div class="flex justify-between items-center mb-6">
+            <form method="GET" action="{{ path('offer_index') }}" class="flex bg-white shadow-lg rounded-lg overflow-hidden">
                 <input type="hidden" name="type" value="{{ type }}">
-                <input type="text" name="search" placeholder="Rechercher des offres..." value="{{ search }}">
-                <button type="submit">🔍</button>
+                <input type="text" name="search" placeholder="Rechercher des offres..." value="{{ search }}" class="px-4 py-3 w-80 outline-none">
+                <button type="submit" class="px-6 py-3 bg-purple-700 text-white font-semibold hover:bg-purple-800 transition">🔍</button>
             </form>
+            {% if app.user %}
+                <a href="{{ path('offer_new') }}" class="bg-purple-700 text-white px-6 py-3 rounded-lg font-semibold hover:bg-purple-800 transition">➕ Ajouter une offre</a>
+            {% endif %}
         </div>
 
-        <h2>Les Offres</h2>
-        {% if app.user %}
-            <a href="{{ path('offer_new') }}" class="btn">➕ Ajouter une offre</a>
-        {% endif %}
+        <!-- Switch entre les types d'offres -->
+        <div class="flex justify-center mb-6">
+            <div class="inline-flex bg-gray-200 p-1 rounded-lg">
+                <a href="{{ path('offer_index', {'type': 'all'}) }}" class="px-4 py-2 rounded-lg font-semibold transition {% if type == 'all' %}bg-purple-700 text-white{% else %}text-gray-700{% endif %}">Toutes</a>
+                <a href="{{ path('offer_index', {'type': 'mine'}) }}" class="px-4 py-2 rounded-lg font-semibold transition {% if type == 'mine' %}bg-purple-700 text-white{% else %}text-gray-700{% endif %}">Mes Offres</a>
+                <a href="{{ path('offer_index', {'type': 'matching'}) }}" class="px-4 py-2 rounded-lg font-semibold transition {% if type == 'matching' %}bg-purple-700 text-white{% else %}text-gray-700{% endif %}">Offres Correspondantes</a>
+            </div>
+        </div>
 
+        <h2 class="text-3xl font-bold text-center text-gray-900 mb-6">Les Offres</h2>
+        
         {% if search %}
-            <p>Résultats pour : <strong>{{ search }}</strong></p>
-            <a href="{{ path('offer_index') }}">Réinitialiser la recherche</a>
+            <p class="text-center text-gray-700 mb-4">Résultats pour : <strong>{{ search }}</strong></p>
+            <div class="text-center mb-6">
+                <a href="{{ path('offer_index') }}" class="text-purple-700 hover:underline">Réinitialiser la recherche</a>
+            </div>
         {% endif %}
 
         {% if pagination.items is empty %}
-            <p>Aucune offre ne correspond à votre recherche.</p>
+            <p class="text-center text-gray-700">Aucune offre ne correspond à votre recherche.</p>
         {% else %}
-            <div class="offer-grid">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {% for offer in pagination %}
-                    <div class="offer-card">
-                        <h5 class="offer-title">
+                    <div class="bg-white p-6 rounded-lg shadow-lg hover:shadow-xl transition">
+                        <h5 class="text-xl font-bold text-purple-700 mb-2">
                             <a href="{{ path('offer_show', { id: offer.id }) }}">{{ offer.title }}</a>
                         </h5>
-                        <p><span class="status-badge">{{ offer.status.value }}</span></p>
-                        <p>{{ offer.description|slice(0, 100) }}...</p>
-                        <a href="{{ path('offer_show', { id: offer.id }) }}" class="btn">Voir l'offre</a>
+                        <p class="text-gray-600 mb-2"><span class="px-3 py-1 bg-green-500 text-white text-sm rounded-full">{{ offer.status.value }}</span></p>
+                        <p class="text-gray-700 mb-4">{{ offer.description|slice(0, 100) }}...</p>
+                        <a href="{{ path('offer_show', { id: offer.id }) }}" class="inline-block bg-purple-700 text-white px-4 py-2 rounded-lg font-semibold hover:bg-purple-800 transition">Voir l'offre</a>
                     </div>
                 {% endfor %}
             </div>
 
             <!-- Pagination -->
-            <div class="pagination">
+            <div class="mt-8 text-center">
                 {{ knp_pagination_render(pagination) }}
             </div>
         {% endif %}

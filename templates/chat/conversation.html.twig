@@ -3,62 +3,49 @@
 {% block title %}Conversation{% endblock %}
 
 {% block body %}
-{{ dump("TEMPLATE CHARGÉ") }}
-
-    <h1>Conversation {{ conversation.id }}</h1>
-    
-    <div id="messages">
-        {% for message in messages %}
-            <p><strong>{{ message.sender.lastName ?? 'Utilisateur inconnu' }}</strong>: {{ message.content }}</p>
-        {% endfor %}
+    <div class="container mx-auto py-8 px-6 max-w-2xl bg-white shadow-lg rounded-lg">
+        <h2 class="text-2xl font-bold text-center text-gray-900 mb-6">Conversation</h2>
+        
+        <div id="messages" class="bg-gray-100 p-4 rounded-lg h-80 overflow-y-auto shadow-inner">
+            {% for message in messages %}
+                <div class="mb-2 p-2 rounded-lg {% if message.sender == app.user %} bg-blue-500 text-white self-end text-right {% else %} bg-gray-300 text-black self-start {% endif %}">
+                    <strong>{{ message.sender.lastName ?? 'Utilisateur inconnu' }}</strong>: {{ message.content }}
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="mt-4">
+            {{ form_start(form, {'attr': {'class': 'flex space-x-2'}}) }}
+                {{ form_widget(form.content, {'attr': {'class': 'flex-1 px-4 py-2 border rounded-lg shadow-sm', 'placeholder': 'Écrivez un message...'}}) }}
+                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition">Envoyer</button>
+            {{ form_end(form) }}
+        </div>
     </div>
-
-    {{ form_start(form) }}
-        {{ form_row(form.content) }}
-        <button type="submit">Envoyer</button>
-    {{ form_end(form) }}
-
 
 <script>
     document.addEventListener("DOMContentLoaded", function() {
         console.log("🚀 Script JS chargé");
-
-
-
         {% if conversation is defined and conversation.id is defined %}
             const conversationId = "{{ conversation.id }}";
-            const topic = `http://localhost:8000/chat/${conversationId}`;
-
-            console.log("✅ Connexion Mercure : Chat pour la conversation {{ conversation.id }}");
-            console.log("🔍 Topic Mercure :", topic);
-
-            const eventSource = new EventSource("http://localhost:3000/.well-known/mercure?topic=http://localhost:8000/chat/1");
-
-            eventSource.onopen = function() {
-                console.log("✅ Connexion établie avec Mercure !");
-            };
-
+            const eventSource = new EventSource("http://localhost:3000/.well-known/mercure?topic=http://localhost:8000/chat/" + conversationId);
+            
             eventSource.onmessage = function(event) {
                 console.log("📩 Message reçu :", event.data);
-
                 const data = JSON.parse(event.data);
                 const messagesContainer = document.querySelector("#messages");
-
-                messagesContainer.innerHTML += `
-                    <p><strong>${data.sender}</strong>: ${data.message} <small>${data.createdAt}</small></p>
-                `;
+                
+                let messageDiv = document.createElement("div");
+                messageDiv.classList.add("mb-2", "p-2", "rounded-lg");
+                if (data.sender === "{{ app.user.lastName }}") {
+                    messageDiv.classList.add("bg-blue-500", "text-white", "self-end", "text-right");
+                } else {
+                    messageDiv.classList.add("bg-gray-300", "text-black", "self-start");
+                }
+                messageDiv.innerHTML = `<strong>${data.sender}</strong>: ${data.message}`;
+                messagesContainer.appendChild(messageDiv);
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
             };
-
-            eventSource.onerror = function(event) {
-                console.error("❌ Erreur Mercure :", event);
-            };
-        {% else %}
-            console.error("❌ Erreur : La variable conversation n'est pas définie.");
         {% endif %}
     });
 </script>
-
-
 {% endblock %}
-
-

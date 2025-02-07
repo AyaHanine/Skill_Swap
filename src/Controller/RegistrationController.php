@@ -83,7 +83,7 @@ class RegistrationController extends AbstractController
 
             //envoie de l'email de confirmation
             $email = (new TemplatedEmail())
-                ->from(new Address('verify-auth@myges.fr', 'SkillSWapp_tech'))
+                ->from(new Address('ayahanine72@gmail.com', 'SkillSWapp_tech'))
                 ->to(new Address($user->getEmail()))
                 ->subject('Please Confirm your Email')
                 ->htmlTemplate('emails/confirmation_email.html.twig')
@@ -128,6 +128,7 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('security_login');
         }
         $user->setIsVerified(true);
+        $user->setBio("tets");
         $entityManager->flush();
         $this->addFlash('success', 'Votre email a été vérifié avec succès ! Vous pouvez maintenant vous connecter.');
 
@@ -157,8 +158,8 @@ class RegistrationController extends AbstractController
         );
 
         // Renvoyer l'email
-        $email = (new Email())
-            ->from(new Address('noreply@skillswap.com', 'SkillSwap'))
+        $email = (new TemplatedEmail())
+            ->from(new Address('ayahanine72@gmail.com', 'SkillSwap'))
             ->to(new Address($user->getEmail()))
             ->subject('Vérifiez votre adresse email')
             ->htmlTemplate('emails/confirmation_email.html.twig')

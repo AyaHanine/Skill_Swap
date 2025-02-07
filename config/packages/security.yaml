@@ -21,6 +21,7 @@ security:
         path: security_logout
         # where to redirect after logout
         target: home
+      
 
       remember_me:
         secret: "%kernel.secret%"

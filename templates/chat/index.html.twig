@@ -3,19 +3,36 @@
 {% block title %}Conversations{% endblock %}
 
 {% block body %}
-    <h1>Vos Conversations</h1>
-    <ul>
-        {% for conversation in conversations %}
-            <li>
-                <a href="{{ path('chat_conversation', { id: conversation.id }) }}">
-                    Conversation avec 
-                    {% if conversation.userOne == app.user %}
-                        {{ conversation.userTwo.lastname }} {{ conversation.userTwo.firstname }}
-                    {% else %}
-                        {{ conversation.userOne.lastname }} {{ conversation.userOne.firstname }}
-                    {% endif %}
-                </a>
-            </li>
-        {% endfor %}
-    </ul>
+    <div class="container mx-auto py-8 px-6 max-w-3xl bg-white shadow-lg rounded-lg">
+        <h2 class="text-2xl font-bold text-center text-gray-900 mb-6">Vos Conversations</h2>
+        
+        <div class="bg-gray-100 p-4 rounded-lg shadow-md">
+            {% if conversations is empty %}
+                <p class="text-center text-gray-500">Aucune conversation en cours.</p>
+            {% else %}
+                <ul class="space-y-4">
+                    {% for conversation in conversations %}
+                        <li class="bg-white p-4 rounded-lg shadow hover:shadow-md transition">
+                            <a href="{{ path('chat_conversation', { id: conversation.id }) }}" class="flex items-center space-x-4 text-gray-800 hover:text-blue-600">
+                                <div class="flex items-center justify-center bg-blue-500 text-white rounded-full w-10 h-10 text-lg font-semibold">
+                                    {% if conversation.userOne == app.user %}
+                                        {{ conversation.userTwo.firstname}}
+                                    {% else %}
+                                        {{ conversation.userOne.firstname }}
+                                    {% endif %}
+                                </div>
+                                <span class="font-semibold text-lg">
+                                    {% if conversation.userOne == app.user %}
+                                        {{ conversation.userTwo.lastname }} {{ conversation.userTwo.firstname }}
+                                    {% else %}
+                                        {{ conversation.userOne.lastname }} {{ conversation.userOne.firstname }}
+                                    {% endif %}
+                                </span>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        </div>
+    </div>
 {% endblock %}

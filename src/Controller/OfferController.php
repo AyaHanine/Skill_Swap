@@ -51,17 +51,17 @@ final class OfferController extends AbstractController
                 break;
 
             case 'matching':
-                $queryBuilder = $offerRepository->createQueryBuilder('o')
-                    ->join('o.skillWanted', 's')
-                    ->join('s.users', 'u')
-                    ->where('u = :user')
-                    ->setParameter('user', $user);
+                $queryBuilder = $offerRepository->findOffersForUser($user);
                 break;
-
             case 'all':
             default:
                 $queryBuilder = $offerRepository->createQueryBuilder('o');
                 break;
+        }
+        if (!$queryBuilder instanceof \Doctrine\ORM\QueryBuilder) {
+            $queryBuilder = $offerRepository->createQueryBuilder('o')
+                ->where('o.id IN (:offerIds)')
+                ->setParameter('offerIds', array_map(fn($o) => $o->getId(), $queryBuilder));
         }
 
         // Appliquer la recherche si un terme est entré
@@ -70,8 +70,19 @@ final class OfferController extends AbstractController
                 ->setParameter('search', "%$search%");
         }
 
+
+        if ($queryBuilder instanceof \Doctrine\ORM\QueryBuilder) {
+            $queryBuilder->orderBy('o.createdAt', 'DESC');
+        } else {
+            if (!$queryBuilder instanceof \Doctrine\ORM\QueryBuilder) {
+                $queryBuilder = $offerRepository->createQueryBuilder('o')
+                    ->where('o.id IN (:offerIds)')
+                    ->setParameter('offerIds', array_map(fn($o) => $o->getId(), $queryBuilder));
+            }
+        }
         // Trier par date de création (les plus récentes en premier)
         $queryBuilder->orderBy('o.createdAt', 'DESC');
+
 
         // Exécuter la requête et paginer les résultats
         $query = $queryBuilder->getQuery();

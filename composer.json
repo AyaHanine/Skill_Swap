@@ -108,7 +108,7 @@
         "doctrine/doctrine-fixtures-bundle": "^4.0",
         "fakerphp/faker": "^1.24",
         "phpstan/phpstan": "*",
-        "phpunit/phpunit": "^9.5",
+        "phpunit/phpunit": "*",
         "symfony/browser-kit": "7.2.*",
         "symfony/css-selector": "7.2.*",
         "symfony/debug-bundle": "7.2.*",
