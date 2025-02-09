@@ -108,33 +108,28 @@ final class RequestController extends AbstractController
         int $id
     ): Response {
 
-        // Récupérer l'utilisateur connecté
         $user = $this->getUser();
         if (!$user) {
             $this->addFlash('error', 'Vous devez être connecté pour envoyer une demande.');
             return $this->redirectToRoute('offer_index');
         }
 
-        // Récupérer l'offre via son ID
         $offer = $offerRepository->find($id);
         if (!$offer) {
             $this->addFlash('error', 'Offre non trouvée.');
             return $this->redirectToRoute('offer_index');
         }
 
-        // Vérifier que l'utilisateur ne postule pas à sa propre offre
         if ($offer->getUser() === $user) {
             $this->addFlash('error', 'Vous ne pouvez pas envoyer une demande pour votre propre offre.');
             return $this->redirectToRoute('offer_show', ['id' => $id]);
         }
 
-        // Vérifier que le statut de l'offre est bien "disponible"
         if ($offer->getStatus() !== OfferStatus::Disponible) {
             $this->addFlash('error', 'Cette offre n\'est pas disponible.');
             return $this->redirectToRoute('offer_show', ['id' => $id]);
         }
 
-        // Vérifier si l'utilisateur a déjà fait une demande pour cette offre
         $existingRequest = $entityManager->getRepository(Request::class)->findOneBy([
             'user' => $user,
             'offer' => $offer
@@ -145,11 +140,9 @@ final class RequestController extends AbstractController
             return $this->redirectToRoute('offer_show', ['id' => $id]);
         }
 
-        // Récupérer le message depuis le JSON envoyé par le front
         $data = json_decode($request->getContent(), true);
         $message = $data['message'] ?? '';
 
-        // Créer une nouvelle demande
         $requestEntity = new Request();
         $requestEntity->setUser($user);
         $requestEntity->setOffer($offer);
@@ -159,7 +152,6 @@ final class RequestController extends AbstractController
 
         $entityManager->persist($requestEntity);
 
-        // Créer une notification pour l'auteur de l'offre
         $notification = new Notification();
         $notification->setUser($offer->getUser());
         $notification->setMessage("Vous avez reçu une nouvelle demande de la part de {$user->getFirstName()} {$user->getLastName()} !");
@@ -186,16 +178,13 @@ final class RequestController extends AbstractController
             return $this->redirectToRoute('dashboard');
         }
 
-        // Mettre la demande à "acceptée"
         $requestEntity->setStatus(RequestStatus::Acceptee);
 
-        // Changer le statut de l'offre à "réservée"
         $offer = $requestEntity->getOffer();
         $offer->setStatus(OfferStatus::Reserve);
 
         $entityManager->flush();
 
-        // Vérifier si une conversation existe déjà entre ces deux utilisateurs
         $existingConversation = $entityManager->getRepository(Conversation::class)->findOneBy([
             'userOne' => $requestEntity->getUser(),
             'userTwo' => $requestEntity->getOffer()->getUser(),
@@ -205,7 +194,6 @@ final class RequestController extends AbstractController
                     ]);
 
         if (!$existingConversation) {
-            // Créer une nouvelle conversation
             $conversation = new Conversation();
             $conversation->setUserOne($requestEntity->getUser());
             $conversation->setUserTwo($requestEntity->getOffer()->getUser());
@@ -215,7 +203,6 @@ final class RequestController extends AbstractController
             $entityManager->flush();
         }
 
-        // Notifier l'utilisateur demandeur
         $notification = new Notification();
         $notification->setUser($requestEntity->getUser());
         $notification->setMessage("Votre demande pour '{$offer->getTitle()}' a été acceptée ! Le chat est désormais activé !");
@@ -239,11 +226,9 @@ final class RequestController extends AbstractController
             return $this->redirectToRoute('dashboard');
         }
 
-        // Supprimer la demande
         $entityManager->remove($requestEntity);
         $entityManager->flush();
 
-        // Notifier l'utilisateur demandeur
         $notification = new Notification();
         $notification->setUser($requestEntity->getUser());
         $notification->setMessage("Votre demande pour '{$requestEntity->getOffer()->getTitle()}' a été refusée.");

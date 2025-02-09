@@ -44,7 +44,6 @@
                                 <a href="{{ path('app_skill') }}" class="hover:text-gray-300 text-black">Skills</a>
                                 <a href="{{ path('app_user') }}" class="hover:text-gray-300 text-black">Users</a>
                                 <a href="{{ path('admin_manage_reports') }}" class="hover:text-gray-300 text-black">Reports</a>
-                                <a href="{{ path('admin_offers') }}" class="hover:text-gray-300 text-black">Offers</a>
                             </div>
                         {% endif %}
                         {% if is_granted('ROLE_USER') and not is_granted('ROLE_ADMIN')%}
@@ -58,7 +57,6 @@
                         <a href="{{ path('app_skill') }}" class="hover:text-gray-300 text-black">Skills</a>
                                 <a href="{{ path('app_user') }}" class="hover:text-gray-300 text-black">Users</a>
                                 <a href="{{ path('admin_manage_reports') }}" class="hover:text-gray-300 text-black">Reports</a>
-                                <a href="{{ path('admin_offers') }}" class="hover:text-gray-300 text-black">Offers</a>
                                 {% endif %}
                     {% endif %}
                 </nav>

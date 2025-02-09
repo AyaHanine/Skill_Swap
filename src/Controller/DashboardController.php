@@ -23,16 +23,12 @@ final class DashboardController extends AbstractController
     ) {
         $user = $this->getUser();
 
-        // Récupérer les dernières offres
         $latestOffers = $offerRepository->findBy([], ['createdAt' => 'DESC'], 5);
 
-        // Récupérer les demandes en attente de l'utilisateur
         $pendingRequests = $requestRepository->findBy(['user' => $user, 'status' => 'pending']);
 
-        // Récupérer les messages non lus
         $unreadMessages = $messageRepository->findBy(['receiver' => $user]);
 
-        // Récupérer les avis laissés sur l'utilisateur
         dump($userReviews = $reviewRepository->findBy(['reviwedUser' => $user]));
 
         $requests = $requestRepository->findReceivedRequests($user);

@@ -154,7 +154,6 @@ class Skill
     public function removeOffersAsWantedSkill(Offer $offersAsWantedSkill): static
     {
         if ($this->offersAsWantedSkill->removeElement($offersAsWantedSkill)) {
-            // set the owning side to null (unless already changed)
             if ($offersAsWantedSkill->getWantedSkill() === $this) {
                 $offersAsWantedSkill->setWantedSkill(null);
             }
@@ -167,7 +166,6 @@ class Skill
     public function removeOffersAsSkillOffered(Offer $offersAsSkillOffered): static
     {
         if ($this->offersAsSkillOffered->removeElement($offersAsSkillOffered)) {
-            // set the owning side to null (unless already changed)
             if ($offersAsSkillOffered->getOfferedSkill() === $this) {
                 $offersAsSkillOffered->setOfferedSkill(null);
             }

@@ -17,7 +17,7 @@ class MailService
     public function sendEmail(string $to, string $subject, string $content): void
     {
         $email = (new Email())
-            ->from('824a5b001@smtp-brevo.com') // Remplace par ton e-mail Brevo
+            ->from('824a5b001@smtp-brevo.com')
             ->to($to)
             ->subject($subject)
             ->html($content);

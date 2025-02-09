@@ -36,14 +36,12 @@ final class ChatController extends AbstractController
         EntityManagerInterface $entityManager,
         HubInterface $hub
     ): Response {
-        // Vérifier si l'utilisateur appartient bien à cette conversation
         if ($conversation->getUserOne() !== $this->getUser() && $conversation->getUserTwo() !== $this->getUser()) {
             throw $this->createAccessDeniedException("Vous n'avez pas accès à cette conversation.");
         }
 
         $messages = $messageRepository->findBy(['conversation' => $conversation], ['createdAt' => 'ASC']);
 
-        // Formulaire d'envoi de message
         $message = new Message();
         $form = $this->createForm(MessageType::class, $message);
         $form->handleRequest($request);
@@ -57,7 +55,6 @@ final class ChatController extends AbstractController
             $entityManager->persist($message);
             $entityManager->flush();
 
-            // 🔴 Publier le message sur Mercure pour le temps réel
             $topic = "http://localhost/chat/" . $conversation->getId();
             error_log("🔴 Mercure : Envoi du message sur le topic " . $topic);
 

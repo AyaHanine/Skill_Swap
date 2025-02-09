@@ -63,7 +63,6 @@ class Category
     public function removeSkill(Skill $skill): static
     {
         if ($this->skills->removeElement($skill)) {
-            // set the owning side to null (unless already changed)
             if ($skill->getCategory() === $this) {
                 $skill->setCategory(null);
             }

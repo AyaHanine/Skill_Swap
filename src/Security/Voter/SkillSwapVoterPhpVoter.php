@@ -20,17 +20,14 @@ final class SkillSwapVoterPhpVoter extends Voter
     {
         $user = $token->getUser();
 
-        // if the user is anonymous, do not grant access
         if (!$user instanceof UserInterface) {
             return false;
         }
 
-        // Admin peut tout faire
         if (in_array('ROLE_ADMIN', $user->getRoles())) {
             return true;
         }
 
-        // Vérifier si l'utilisateur est propriétaire de l'entité
         return $subject->getUser() === $user;
 
 

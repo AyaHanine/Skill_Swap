@@ -39,7 +39,7 @@ final class UserController extends AbstractController
     public function show(User $user): Response
     {
         $competencesValidées = $user->getSkills()->filter(function ($competence) {
-            return $competence->getStatus() !== SkillStatus::enAttente;  // Filtrer celles avec le statut "en attente"
+            return $competence->getStatus() !== SkillStatus::enAttente;
         });
         return $this->render('user/index.html.twig', [
             'user' => $user,
@@ -61,14 +61,12 @@ final class UserController extends AbstractController
             $encodedPassword = $passwordHasher->hashPassword($user, 'passwordProvisoir');
             $user->setPassword($encodedPassword);
 
-            // Enregistrer le nouvel utilisateur dans la base de données
 
             $entityManager->persist($user);
             $entityManager->flush();
 
             $this->addFlash('success', 'Utilisateur ajouté avec succès.');
 
-            // Rediriger vers la liste des utilisateurs
             return $this->redirectToRoute('app_user');
         }
 
@@ -81,18 +79,15 @@ final class UserController extends AbstractController
     #[IsGranted('ROLE_ADMIN')]
     public function editUser(User $user, Request $request, EntityManagerInterface $entityManager): Response
     {
-        // Créer le formulaire pour modifier un utilisateur
         $form = $this->createForm(UserType::class, $user);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $user->setUpdatedAt(new \DateTimeImmutable());
-            // Mettre à jour les informations de l'utilisateur
             $entityManager->flush();
 
             $this->addFlash('success', 'Utilisateur modifié avec succès.');
 
-            // Rediriger vers la liste des utilisateurs
             return $this->redirectToRoute('app_user');
         }
 
@@ -156,11 +151,11 @@ final class UserController extends AbstractController
         foreach ($requests as $request) {
             $entityManager->remove($request);
         }
-        $skills = $entityManager->getRepository(Skill::class)->findAll(); // Récupère toutes les compétences
+        $skills = $entityManager->getRepository(Skill::class)->findAll();
 
         foreach ($skills as $skill) {
-            if ($skill->getUsers()->contains($user)) { // Vérifie si l'utilisateur est dans la collection
-                $skill->removeUser($user); // Supposons que tu as une méthode removeUser() dans Skill
+            if ($skill->getUsers()->contains($user)) {
+                $skill->removeUser($user);
                 $entityManager->persist($skill);
             }
         }
@@ -168,12 +163,11 @@ final class UserController extends AbstractController
         foreach ($notifications as $notification) {
             $entityManager->remove($notification);
         }
-        // Supprimer l'utilisateur de la base de données
         $entityManager->remove($user);
         $entityManager->flush();
 
         $this->addFlash('success', 'Utilisateur supprimé avec succès.');
 
-        return $this->redirectToRoute('app_users');
+        return $this->redirectToRoute('app_user');
     }
 }

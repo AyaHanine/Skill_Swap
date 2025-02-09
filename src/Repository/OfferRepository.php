@@ -56,11 +56,11 @@ class OfferRepository extends ServiceEntityRepository
     {
 
         return $this->createQueryBuilder('o')
-            ->leftJoin('o.wantedSkill', 'sr') // Compétence requise pour l'offre
-            ->leftJoin('o.user', 'u') // Ajout de la relation avec l'utilisateur qui a posté l'offre
-            ->leftJoin('u.skills', 'us') // L'utilisateur connecté et ses compétences
-            ->where('us.id = sr.id')  // Vérifie si l'utilisateur possède la compétence requise
-            ->orWhere('o.isNegotiable = true') // Inclut les offres négociables
+            ->leftJoin('o.wantedSkill', 'sr')
+            ->leftJoin('o.user', 'u')
+            ->leftJoin('u.skills', 'us')
+            ->where('us.id = sr.id')
+            ->orWhere('o.isNegotiable = true')
             ->getQuery()
             ->getResult();
     }

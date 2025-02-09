@@ -44,19 +44,18 @@ class UserEditFormType extends AbstractType
             ])
             ->add('competence_autre', \Symfony\Component\Form\Extension\Core\Type\TextType::class, [
                 'label' => 'Autre compétence',
-                'required' => false, // Ce champ est optionnel,
+                'required' => false,
                 'mapped' => false,
             ])
             ->add('submit', SubmitType::class, ['label' => 'Mettre à jour']);
     }
 
-    // Méthode pour récupérer les compétences validées et les mettre dans le formulaire
     private function getSkillsChoices($skillsValidées)
     {
         $choices = [];
 
         foreach ($skillsValidées as $skill) {
-            $choices[$skill->getName()] = $skill; // Utiliser l'objet Skill entier
+            $choices[$skill->getName()] = $skill;
         }
         return $choices;
     }

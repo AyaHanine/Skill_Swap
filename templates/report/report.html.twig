@@ -3,28 +3,41 @@
 {% block title %}Signaler une offre{% endblock %}
 
 {% block body %}
-    <div class="container">
-        <h1>Signaler cette offre</h1>
+    <div class="relative min-h-screen flex items-center justify-center py-10">
+        <!-- Background Design -->
+        <div class="absolute inset-0 flex items-center justify-center z-0">
+            <div class="bg-gradient-to-r from-red-500 to-red-700 opacity-80 w-3/4 h-3/4 rounded-2xl transform rotate-6"></div>
+        </div>
 
-        {# Afficher les messages flash (success ou error) #}
-        {% for label, messages in app.flashes %}
-            <div class="alert alert-{{ label }}">
-                {% for message in messages %}
-                    <p>{{ message }}</p>
-                {% endfor %}
-            </div>
-        {% endfor %}
+        <!-- Form Container -->
+        <div class="relative z-10 bg-white p-8 rounded-xl shadow-xl w-full max-w-lg">
+            <h2 class="text-3xl font-bold text-center text-gray-900 mb-6">Signaler une Offre</h2>
 
-        {# Afficher le formulaire de signalement #}
-        <form method="post">
-            {{ form_start(form) }}
-            
-            <div class="mb-3">
-                {{ form_row(form.reason) }}  {# Affiche le champ de raison du signalement #}
-            </div>
-            <button type="submit" class="btn btn-primary">Envoyer le signalement</button>
+            {# Affichage des messages flash #}
+            {% for label, messages in app.flashes %}
+                <div class="bg-{{ label == 'success' ? 'green' : 'red' }}-100 border border-{{ label == 'success' ? 'green' : 'red' }}-500 text-{{ label == 'success' ? 'green' : 'red' }}-700 px-4 py-3 rounded mb-4">
+                    {% for message in messages %}
+                        <p>{{ message }}</p>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+
+            {# Formulaire de signalement #}
+            {{ form_start(form, {'attr': {'class': 'space-y-4'}}) }}
+                <div>
+                    {{ form_label(form.reason, 'Motif du signalement', {'label_attr': {'class': 'block text-gray-700 font-semibold'}}) }}
+                    {{ form_widget(form.reason, {'attr': {'class': 'w-full px-4 py-3 border rounded-lg shadow-sm'}}) }}
+                </div>
+
+                <button type="submit" class="w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700 transition duration-300 shadow-md">
+                    🚨 Envoyer le signalement
+                </button>
             {{ form_end(form) }}
-        </form>
-        {# Bouton pour retourner à la page de l'offre #}
-        
+
+            {# Bouton pour retourner à la page de l'offre #}
+            <div class="mt-4 text-center">
+                <a href="{{ path('offer_index') }}" class="text-red-700 hover:underline">← Retour aux Offres</a>
+            </div>
+        </div>
+    </div>
 {% endblock %}

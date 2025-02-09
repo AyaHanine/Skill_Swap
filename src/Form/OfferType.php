@@ -44,10 +44,10 @@ class OfferType extends AbstractType
                     'Annulé' => OfferStatus::Annule,
                 ],
                 'label' => 'Statut de l\'offre',
-                'expanded' => false, // false = liste déroulante, true = boutons radio
-                'multiple' => false, // Un seul choix possible
+                'expanded' => false,
+                'multiple' => false,
                 'choice_label' => function ($choice, $key, $value) {
-                    return $key; // Afficher les labels propres
+                    return $key;
                 },
             ])
             ->add('negotiable', CheckboxType::class, [

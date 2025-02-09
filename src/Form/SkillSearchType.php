@@ -52,9 +52,9 @@ class SkillSearchType extends AbstractType
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'is_search' => false, // Par défaut, ce n'est pas un formulaire de recherche
-            'csrf_protection' => false, // Désactiver CSRF pour les recherches
-            'data_class' => null, // IMPORTANT: On ne lie PAS ce formulaire à l'entité Skill
+            'is_search' => false,
+            'csrf_protection' => false,
+            'data_class' => null,
         ]);
     }
 }

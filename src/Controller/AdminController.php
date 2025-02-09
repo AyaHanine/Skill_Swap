@@ -4,6 +4,9 @@ namespace App\Controller;
 
 use App\Entity\Offer;
 use App\Entity\Report;
+use App\Enum\OfferStatus;
+use App\Repository\OfferRepository;
+use App\Repository\ReportRepository;
 use App\Repository\UserRepository;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -31,84 +34,54 @@ final class AdminController extends AbstractController
     }
 
 
-    // Route pour afficher la gestion des signalements
+
     #[Route('/admin/reports', name: 'admin_manage_reports')]
-    public function manageReports(EntityManagerInterface $entityManager): Response
+    public function manageReports(EntityManagerInterface $entityManager, ReportRepository $reportRepository): Response
     {
-        // Récupérer tous les utilisateurs
-        $users = $entityManager->getRepository(User::class)->findAll();
+        $reports = $reportRepository->findBy(['status' => 'En attente']);
 
-        // Récupérer les offres
-        $offers = $entityManager->getRepository(Offer::class)->findAll();
-
-        $reportedUserCounts = 0;
-        $reportedOfferCounts = 0;
-
-        // Calculer les signalements pour chaque utilisateur
-        foreach ($users as $user) {
-            $reportedUserCount = $entityManager->getRepository(Report::class)->count(['repportedUser' => $user]);
-            $reportedUserCounts = $reportedUserCount;
-        }
-
-
-        // Calculer les signalements pour chaque offre
-        foreach ($offers as $offer) {
-            $reportedOfferCount = $entityManager->getRepository(Report::class)->count(['Offer' => $offer]);
-            $reportedOfferCounts = $reportedOfferCount;
-        }
-
-        return $this->render('admin/manage_reports.html.twig', [
-            'users' => $users,
-            'offers' => $offers,
-            'reportedOffer' => $reportedOfferCounts,
-            'reportedUser' => $reportedUserCounts,
+        return $this->render('admin/reports/index.html.twig', [
+            'reports' => $reports,
         ]);
     }
 
-    #[Route('/admin/banned-users', name: 'admin_banned_users', methods: ['GET'])]
-    public function bannedUsers(UserRepository $userRepository): Response
-    {
-        $bannedUsers = $userRepository->findBannedUsers();
+    #[Route('/approve/{id}', name: 'admin_approve_report')]
+    public function approve(
+        Report $report,
+        EntityManagerInterface $entityManager,
+        ReportRepository $reportRepository,
+        OfferRepository $offerRepository
+    ): Response {
+        $report->approve();
+        $entityManager->flush();
 
-        return $this->render('admin/banned_users.html.twig', [
-            'bannedUsers' => $bannedUsers
-        ]);
-    }
+        $offer = $report->getOffer();
+        $approvedReports = $reportRepository->count(['Offer' => $offer, 'isApproved' => true]);
 
-
-    // Bannir l'utilisateur après 3 signalements
-    #[Route('/admin/ban/user/{id}', name: 'admin_ban_user')]
-    public function banUser(User $user, EntityManagerInterface $entityManager): Response
-    {
-        // Vérifier si l'utilisateur a 3 signalements
-        $reportCount = $entityManager->getRepository(Report::class)->count(['repportedUser' => $user]);
-
-        // Si l'utilisateur a 3 signalements, le bannir
-        if ($reportCount >= 3) {
-            $user->setRoles(['ROLE_BANNED']);
+        if ($approvedReports >= 3) {
+            $offer->setStatus(OfferStatus::Banni);
+            $offerCreator = $offer->getUser();
+            $offerCreator->setRoles(['ROLE_BANNED']);
             $entityManager->flush();
-            $this->addFlash('success', 'L\'utilisateur a été banni après 3 signalements.');
+
+            $this->addFlash('warning', "L'offre et son créateur ont été bannis.");
+        } else {
+            $this->addFlash('success', "Signalement approuvé.");
         }
 
         return $this->redirectToRoute('admin_manage_reports');
     }
 
-    // Bannir l'utilisateur associé à une offre après 3 signalements
-    #[Route('/admin/ban/offer/{id}', name: 'admin_ban_offer')]
-    public function banOffer(Offer $offer, EntityManagerInterface $entityManager): Response
+    #[Route('/reject/{id}', name: 'admin_reject_report')]
+    public function reject(Report $report, EntityManagerInterface $entityManager): Response
     {
-        // Vérifier si l'offre a 3 signalements
-        $reportCount = $entityManager->getRepository(Report::class)->count(['Offer' => $offer]);
+        $report->setStatus('Rejeté');
+        $entityManager->flush();
 
-        // Si l'offre a 3 signalements, bannir l'utilisateur de l'offre
-        if ($reportCount >= 3) {
-            $user = $offer->getUser(); // Récupérer l'utilisateur qui a posté l'offre
-            $user->setRoles(['ROLE_BANNED']); // Bannir l'utilisateur
-            $entityManager->flush();
-            $this->addFlash('success', 'L\'utilisateur a été banni à cause de 3 signalements sur ses offres.');
-        }
-
+        $this->addFlash('danger', "Signalement rejeté.");
         return $this->redirectToRoute('admin_manage_reports');
     }
+
+
 
 }

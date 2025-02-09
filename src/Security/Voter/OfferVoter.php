@@ -23,17 +23,14 @@ final class OfferVoter extends Voter
     {
         $user = $token->getUser();
 
-        // if the user is anonymous, do not grant access
         if (!$user instanceof UserInterface) {
             return false;
         }
 
-        // Les admins peuvent tout modifier
         if (in_array('ROLE_ADMIN', $user->getRoles())) {
             return true;
         }
 
-        // L'utilisateur ne peut modifier que ses propres offres
         return $subject->getUser() === $user;
     }
 }

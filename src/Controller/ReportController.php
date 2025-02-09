@@ -51,7 +51,7 @@ final class ReportController extends AbstractController
         $report->setOffer($offer);
         $report->setRepportedUser($offer->getUser());
         $report->setCreatedAt(new \DateTimeImmutable());
-        $report->setStatus(ReportStatus::enCours);
+        $report->setStatus('en attente');
 
         $notification = new Notification();
         $notification->setMessage("Votre signalement de l'offre      " . $offer->getTitle() . "     a été bien envoyé !");

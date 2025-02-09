@@ -191,7 +191,6 @@ class Offer
     public function removeRequest(Request $request): static
     {
         if ($this->requests->removeElement($request)) {
-            // set the owning side to null (unless already changed)
             if ($request->getOffer() === $this) {
                 $request->setOffer(null);
             }
@@ -254,7 +253,6 @@ class Offer
     public function removeReport(Report $report): static
     {
         if ($this->reports->removeElement($report)) {
-            // set the owning side to null (unless already changed)
             if ($report->getOffer() === $this) {
                 $report->setOffer(null);
             }

@@ -35,7 +35,6 @@ final class MessageController extends AbstractController
             return new JsonResponse(['error' => 'Utilisateur non trouvé'], 404);
         }
 
-        // Vérifier si le message est vide
         if (!isset($data['message']) || empty($data['message'])) {
             return new JsonResponse(['error' => 'Message vide'], 400);
         }
@@ -50,10 +49,8 @@ final class MessageController extends AbstractController
         $entityManager->persist($message);
         $entityManager->flush();
 
-        // Définir un topic basé sur l'ID de la conversation
         $topic = 'http://localhost/chat/' . $conversationId;
 
-        // Publier le message en temps réel avec Mercure
         $update = new Update(
             $topic,
             json_encode([

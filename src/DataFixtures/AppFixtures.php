@@ -62,6 +62,31 @@ class AppFixtures extends Fixture
             $users[] = $user;
         }
 
+        $user = new User();
+        $user->setEmail('user@gmail.com');
+        $user->setRoles(['ROLE_USER']);
+        $user->setPassword($this->passwordHasher->hashPassword($user, 'userpassword2025')); // password
+        $user->setCreatedAt(new \DateTimeImmutable());
+        $user->setIsVerified(True);
+        $manager->persist($user);
+
+        $user = new User();
+        $user->setEmail('admin@gmail.com');
+        $user->setRoles(['ROLE_ADMIN']);
+        $user->setPassword($this->passwordHasher->hashPassword($user, 'adminpassword2025')); // password
+        $user->setCreatedAt(new \DateTimeImmutable());
+        $user->setIsVerified(True);
+        $manager->persist($user);
+
+
+        $user = new User();
+        $user->setEmail('banned@gmail.com');
+        $user->setRoles(['ROLE_BANNED']);
+        $user->setPassword($this->passwordHasher->hashPassword($user, 'BANNEDpassword2025')); // password
+        $user->setCreatedAt(new \DateTimeImmutable());
+        $user->setIsVerified(True);
+        $manager->persist($user);
+
         // ---------------- SKILLS ----------------
         $skills = [];
         for ($i = 0; $i < 10; $i++) {

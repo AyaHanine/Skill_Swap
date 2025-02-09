@@ -166,7 +166,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     public function setVerifiedUser(): self
     {
-        $this->roles = ['ROLE_VERIFIED_USER'];
         return $this;
     }
 

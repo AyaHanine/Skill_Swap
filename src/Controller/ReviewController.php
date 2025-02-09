@@ -29,19 +29,16 @@ final class ReviewController extends AbstractController
     {
         $user = $this->getUser();
 
-        // Vérifier si l'utilisateur est connecté
         if (!$user) {
             $this->addFlash('error', 'Vous devez être connecté pour laisser un avis.');
             return $this->redirectToRoute('security_login');
         }
 
-        // Vérifier si l'utilisateur a déjà laissé un avis sur cette offre
         if ($reviewRepository->findOneBy(['author' => $user, 'offer' => $offer])) {
             $this->addFlash('error', 'Vous avez déjà noté cette offre.');
             return $this->redirectToRoute('offer_show', ['id' => $offer->getId()]);
         }
 
-        // Vérifier si l'utilisateur ne note pas sa propre offre
         if ($offer->getUser() === $user) {
             $this->addFlash('error', 'Vous ne pouvez pas noter votre propre offre.');
             return $this->redirectToRoute('offer_show', ['id' => $offer->getId()]);

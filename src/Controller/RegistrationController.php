@@ -45,7 +45,6 @@ class RegistrationController extends AbstractController
         $user = new User();
         $competences = $entityManager->getRepository(Skill::class)->findAll();
 
-        // Filtrer les compétences pour ne garder que celles qui ne sont pas en statut "en attente"
         $competencesFiltrées = array_filter($competences, function ($skill) {
             return $skill->getStatus() !== SkillStatus::enAttente; // Ne garder que les compétences non "en attente"
         });
@@ -53,11 +52,9 @@ class RegistrationController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Si l'utilisateur a ajouté une compétence "autre"
 
             $entityManager->flush();
 
-            // Notifier l'utilisateur de la soumission
             $this->addFlash('success', 'Votre compétence a été soumise pour validation.');
 
 
@@ -65,7 +62,6 @@ class RegistrationController extends AbstractController
             /** @var string $plainPassword */
             $plainPassword = $form->get('plainPassword')->getData();
 
-            // encode the plain password
             $user->setPassword($userPasswordHasher->hashPassword($user, $plainPassword));
             $user->setRoles(['ROLE_USER']);
             $user->setIsVerified(false);
@@ -73,7 +69,6 @@ class RegistrationController extends AbstractController
             $entityManager->persist($user);
             $entityManager->flush();
 
-            // generate a signed url and email it to the user
             $signatureComponents = $this->verifyEmailHelper->generateSignature(
                 'verify_email',
                 $user->getId(),
@@ -81,7 +76,6 @@ class RegistrationController extends AbstractController
                 ['id' => $user->getId()]
             );
 
-            //envoie de l'email de confirmation
             $email = (new TemplatedEmail())
                 ->from(new Address('ayahanine72@gmail.com', 'SkillSWapp_tech'))
                 ->to(new Address($user->getEmail()))
@@ -149,7 +143,6 @@ class RegistrationController extends AbstractController
             return $this->redirectToRoute('dashboard');
         }
 
-        // Générer un nouveau lien de vérification
         $signatureComponents = $this->verifyEmailHelper->generateSignature(
             'verify_email',
             $user->getId(),
@@ -157,7 +150,6 @@ class RegistrationController extends AbstractController
             ['id' => $user->getId()]
         );
 
-        // Renvoyer l'email
         $email = (new TemplatedEmail())
             ->from(new Address('ayahanine72@gmail.com', 'SkillSwap'))
             ->to(new Address($user->getEmail()))

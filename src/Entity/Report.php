@@ -33,6 +33,20 @@ class Report
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $createdAt = null;
 
+    #[ORM\Column(type: 'boolean')]
+    private bool $isApproved = false;
+
+    public function isApproved(): bool
+    {
+        return $this->isApproved;
+    }
+
+    public function approve(): self
+    {
+        $this->isApproved = true;
+        $this->status = 'Approuvé';
+        return $this;
+    }
     public function getId(): ?int
     {
         return $this->id;

@@ -20,7 +20,6 @@ class RegistrationFormType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options): void
     {
 
-        // Vérifier que 'competences' existe dans les options
         $skillsValidées = $options['skills'];
         $builder
             ->add(child: 'email')
@@ -33,8 +32,6 @@ class RegistrationFormType extends AbstractType
                 ],
             ])
             ->add('plainPassword', PasswordType::class, [
-                // instead of being set onto the object directly,
-                // this is read and encoded in the controller
                 'mapped' => false,
                 'attr' => ['autocomplete' => 'new-password'],
                 'constraints' => [
@@ -44,7 +41,6 @@ class RegistrationFormType extends AbstractType
                     new Length([
                         'min' => 6,
                         'minMessage' => 'Your password should be at least {{ limit }} characters',
-                        // max length allowed by Symfony for security reasons
                         'max' => 4096,
                     ]),
                 ],
@@ -54,10 +50,9 @@ class RegistrationFormType extends AbstractType
             ->add('bio')
             ->add('skills', EntityType::class, [
                 'class' => Skill::class,
-                'choices' => $this->getSkillsChoices($skillsValidées), // Passer les compétences validées
-                'choice_label' => 'name',
-                'multiple' => true,  // Permet de faire un choix multiple
-                'expanded' => true,  // Affiche les options sous forme de cases à cocher
+                'choices' => $this->getSkillsChoices($skillsValidées),
+                'multiple' => true,
+                'expanded' => true,
             ])
 
 
@@ -68,7 +63,7 @@ class RegistrationFormType extends AbstractType
     {
         $choices = [];
         foreach ($skillsValidées as $skill) {
-            $choices[$skill->getName()] = $skill; // Utiliser l'objet Skill entier
+            $choices[$skill->getName()] = $skill;
         }
         return $choices;
     }

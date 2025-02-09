@@ -22,15 +22,12 @@ final class SkillController extends AbstractController
     public function index(Request $request, EntityManagerInterface $entityManager, SkillRepository $skillRepository): Response
     {
 
-        // Création du formulaire de recherche sans lier à une entité
         $form = $this->createForm(SkillSearchType::class, null, ['method' => 'GET']);
         $form->handleRequest($request);
 
-        // Récupérer les données sous forme de tableau
-        $filters = $form->getData() ?: []; // Si null, on met un tableau vide
+        $filters = $form->getData() ?: [];
         dump($filters);
 
-        // Utiliser les filtres pour récupérer les compétences
         $skills = $skillRepository->findByFilters($filters);
 
         return $this->render('skill/index.html.twig', [
@@ -65,13 +62,11 @@ final class SkillController extends AbstractController
     public function deleteSkill(Skill $skill, EntityManagerInterface $entityManager): Response
     {
 
-        // 1️⃣ Récupérer toutes les offres associées à cette compétence
         dump("1");
         $wanted = $skill->getOffersAsWantedSkill();
         dump("2");
         $offered = $skill->getOffersAsSkillOffered();
 
-        // 2️⃣ Récupérer toutes les requêtes associées aux offres qui utilisent cette compétence
         $requests = [];
         foreach ($wanted as $offer) {
             foreach ($offer->getRequests() as $request) {
@@ -84,14 +79,12 @@ final class SkillController extends AbstractController
             }
         }
         dump("3");
-        // 3️⃣ Supprimer les requêtes avant de supprimer les offres
         foreach ($requests as $request) {
             $entityManager->remove($request);
         }
 
         dump("4");
 
-        // 4️⃣ Supprimer les offres associées
         foreach ($wanted as $offer) {
             $entityManager->remove($offer);
         }
@@ -101,7 +94,6 @@ final class SkillController extends AbstractController
         }
 
 
-        // 5️⃣ Créer une notification pour informer que les offres ont été supprimées
         /*foreach ($$offered as $offer) {
             foreach ($offer->getRequests() as $request) {
                 // Informer les utilisateurs ayant envoyé une demande pour cette offre
@@ -118,7 +110,6 @@ final class SkillController extends AbstractController
             );
         }*/
 
-        // 6️⃣ Supprimer la compétence elle-même
         $entityManager->remove($skill);
         $entityManager->flush();
 

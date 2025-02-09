@@ -32,8 +32,8 @@ final class OfferController extends AbstractController
         MailService $mailService
     ): Response {
         $user = $this->getUser();
-        $type = $request->query->get('type', 'all'); // Type d'offres sélectionné
-        $search = $request->query->get('search', ''); // Terme de recherche
+        $type = $request->query->get('type', 'all');
+        $search = $request->query->get('search', '');
 
         $mailService->sendEmail(
             'ayahanine721@gmail.com',
@@ -42,7 +42,6 @@ final class OfferController extends AbstractController
         );
 
 
-        // Déterminer la requête en fonction du filtre sélectionné
         switch ($type) {
             case 'mine':
                 $queryBuilder = $offerRepository->createQueryBuilder('o')
@@ -64,7 +63,6 @@ final class OfferController extends AbstractController
                 ->setParameter('offerIds', array_map(fn($o) => $o->getId(), $queryBuilder));
         }
 
-        // Appliquer la recherche si un terme est entré
         if (!empty($search)) {
             $queryBuilder->andWhere('o.title LIKE :search OR o.description LIKE :search')
                 ->setParameter('search', "%$search%");
@@ -80,11 +78,9 @@ final class OfferController extends AbstractController
                     ->setParameter('offerIds', array_map(fn($o) => $o->getId(), $queryBuilder));
             }
         }
-        // Trier par date de création (les plus récentes en premier)
         $queryBuilder->orderBy('o.createdAt', 'DESC');
 
 
-        // Exécuter la requête et paginer les résultats
         $query = $queryBuilder->getQuery();
         $pagination = $paginator->paginate(
             $query,
@@ -95,7 +91,7 @@ final class OfferController extends AbstractController
         return $this->render('offer/index.html.twig', [
             'pagination' => $pagination,
             'type' => $type,
-            'search' => $search, // Permet de conserver la valeur du champ de recherche
+            'search' => $search,
         ]);
     }
 
@@ -175,14 +171,13 @@ final class OfferController extends AbstractController
     #[Route('/{id}', name: 'offer_show', methods: ['GET', 'POST'])]
     public function show(Offer $offer): Response
     {
-        // Créer un formulaire vide pour éviter l'erreur dans Twig
         $review = new Review();
         $form = $this->createForm(ReviewFormType::class, $review);
 
 
         return $this->render('offer/show.html.twig', [
             'offer' => $offer,
-            'form' => $form->createView(), // ⚠️ Envoie bien le formulaire à Twig
+            'form' => $form->createView(),
         ]);
     }
 
@@ -213,27 +208,26 @@ final class OfferController extends AbstractController
 
 
         if ($this->isCsrfTokenValid('delete' . $offer->getId(), $request->get('_token'))) {
-            // Suppression des demandes associées
             foreach ($offer->getRequests() as $request) {
 
-                $entityManager->remove($request); // Supprimer les demandes associées
+                $entityManager->remove($request);
                 $notification = new Notification();
                 $notification->setMessage('L\'offre "' . $offer->getTitle() . '" a été supprimée.')
-                    ->setUser($request->getUser()) // Utilise l'utilisateur qui a fait la demande
+                    ->setUser($request->getUser())
                     ->setCreatedAt(new \DateTimeImmutable());
 
-                // Sauvegarder la notification dans la base de données
+
                 $entityManager->persist($notification);
             }
-            $entityManager->flush(); // Effectuer les suppressions des demandes
+            $entityManager->flush();
 
 
 
-            // Suppression des rapports associés à l'offre
+
             foreach ($offer->getReports() as $report) {
-                $entityManager->remove($report); // Supprimer les rapports associés
+                $entityManager->remove($report);
             }
-            $entityManager->flush(); // Effectuer la suppression des rapports
+            $entityManager->flush();
 
             $entityManager->remove($offer);
             $entityManager->flush();
@@ -290,28 +284,24 @@ final class OfferController extends AbstractController
     #[Route('/manage', name: 'admin_offers')]
     public function manageOffers(EntityManagerInterface $entityManager): Response
     {
-        // Récupérer toutes les offres
         $offers = $entityManager->getRepository(Offer::class)->findAll();
+
 
         return $this->render('admin/manage_offers.html.twig', [
             'offers' => $offers,
         ]);
     }
 
-    // Ajouter une nouvelle offre
     #[Route('/new', name: 'admin_new_offer')]
     #[isGranted('ROLE_ADMIN')]
     public function newOffer(Request $request, EntityManagerInterface $entityManager): Response
     {
-        // Créer une nouvelle offre
         $offer = new Offer();
 
-        // Créer le formulaire pour ajouter une offre
         $form = $this->createForm(OfferType::class, $offer);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Enregistrer la nouvelle offre dans la base de données
             $entityManager->persist($offer);
             $entityManager->flush();
 
@@ -329,12 +319,10 @@ final class OfferController extends AbstractController
     #[isGranted('ROLE_ADMIN')]
     public function editOffer(Offer $offer, Request $request, EntityManagerInterface $entityManager): Response
     {
-        // Créer le formulaire pour modifier l'offre
         $form = $this->createForm(OfferType::class, $offer);
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            // Mettre à jour l'offre dans la base de données
             $entityManager->flush();
 
             $this->addFlash('success', 'Offre modifiée avec succès.');
@@ -356,13 +344,11 @@ final class OfferController extends AbstractController
             $entityManager->remove($report);
         }
 
-        // Suppression des demandes associées
         foreach ($offer->getRequests() as $request) {
 
-            $entityManager->remove($request); // Supprimer les demandes associées
+            $entityManager->remove($request);
 
         }
-        // Supprimer l'offre de la base de données
         $entityManager->remove($offer);
         $entityManager->flush();
 
